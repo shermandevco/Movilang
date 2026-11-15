@@ -378,6 +378,8 @@ function SupabaseBackend(url, key) {
   var sb = window.supabase.createClient(url, key);
   var cachedUser;
   function ok(r) { if (r.error) throw new Error(r.error.message); return r.data; }
+  var _uP = null;
+  function waitU() { if (cachedUser) return Promise.resolve(cachedUser); if (!_uP) _uP = profile().then(function (u) { cachedUser = u; _uP = null; return u; }, function () { _uP = null; return null; }); return _uP; }
   function profile() {
     return sb.auth.getUser().then(function (r) {
       var u = r.data && r.data.user; if (!u) return null;
@@ -420,16 +422,16 @@ function SupabaseBackend(url, key) {
     getLesson: function (id) { return sb.from('lessons').select('*').eq('id', id).maybeSingle().then(ok); },
     saveLesson: function (l) { if (l && l._lite) return Promise.reject(new Error('lite lesson — reload page')); var row = {course_id:l.course_id, num:l.num, title:l.title, title_pl:l.title_pl || null, scene_pl:l.scene_pl || null, grammar:l.grammar}; if (l.title_en !== undefined) { row.title_en = l.title_en; row.scene_en = l.scene_en; } row = Object.assign(row, {scene:l.scene, tasks:l.tasks}); if (l.variants !== undefined) row.variants = l.variants; if (l.id) row.id = l.id; return sb.from('lessons').upsert(row).select().single().then(ok); },
     deleteLesson: function (id) { return sb.from('lessons').delete().eq('id', id).then(ok); },
-    myEnrollments: function () { if (!cachedUser) return Promise.resolve([]); return sb.from('enrollments').select('course_id').eq('user_id', cachedUser.id).then(ok).then(function (r) { return r.map(function (x) { return x.course_id; }); }); },
+    myEnrollments: function () { return waitU().then(function () { if (!cachedUser) return []; return sb.from('enrollments').select('course_id').eq('user_id', cachedUser.id).then(ok).then(function (r) { return r.map(function (x) { return x.course_id; }); }); }); },
     ttsList: function () { var out = []; function pg(o) { return sb.from('tts_clips').select('path').range(o, o + 999).then(function (r) { if (r.error) throw r.error; out = out.concat(r.data.map(function (x) { return x.path; })); return r.data.length === 1000 ? pg(o + 1000) : out; }); } return pg(0); },
     ttsAdd: function (row) { return sb.from('tts_clips').upsert(row).then(function (r) { if (r.error) throw r.error; }); },
     token: function () { return sb.auth.getSession().then(function (r) { return r.data.session && r.data.session.access_token; }); },
-    knownList: function (tg) { if (!cachedUser) return Promise.resolve([]); return sb.from('word_known').select('word,known').eq('user_id', cachedUser.id).eq('target', tg).then(ok); },
+    knownList: function (tg) { return waitU().then(function () { if (!cachedUser) return []; return sb.from('word_known').select('word,known').eq('user_id', cachedUser.id).eq('target', tg).then(ok); }); },
     setKnown: function (tg, word, val) { if (!cachedUser) return Promise.resolve(false); var q = val ? sb.from('word_known').upsert({user_id:cachedUser.id, target:tg, word:word, known:true, updated_at:new Date().toISOString()}) : sb.from('word_known').delete().eq('user_id', cachedUser.id).eq('target', tg).eq('word', word); return q.then(ok); },
     saveWriting: function (w) { w.user_id = cachedUser.id; return sb.from('writings').insert(w).select().single().then(ok); },
     updateWriting: function (id, patch) { return sb.from('writings').update(patch).eq('id', id).then(ok); },
-    myWritings: function () { if (!cachedUser) return Promise.resolve([]); return sb.from('writings').select('*').eq('user_id', cachedUser.id).order('created_at', {ascending:false}).limit(50).then(ok); },
-    myLangs: function () { if (!cachedUser) return Promise.resolve([]); return sb.from('enrollment_langs').select('*').eq('user_id', cachedUser.id).then(ok); },
+    myWritings: function () { return waitU().then(function () { if (!cachedUser) return []; return sb.from('writings').select('*').eq('user_id', cachedUser.id).order('created_at', {ascending:false}).limit(50).then(ok); }); },
+    myLangs: function () { return waitU().then(function () { if (!cachedUser) return []; return sb.from('enrollment_langs').select('*').eq('user_id', cachedUser.id).then(ok); }); },
     addLang: function (cid, tg, hidden) { return sb.from('enrollment_langs').upsert({user_id:cachedUser.id, course_id:cid, target:tg, hidden:!!hidden}).then(ok); },
     saveTimes: function (lessonId, score, tm) { if (!cachedUser) return Promise.resolve(false); return sb.from('task_times').insert({user_id:cachedUser.id, lesson_id:lessonId, target:TARGET, score:score, total_sec:tm.total, per_task:tm.per}).then(ok); },
     adminAnalytics: function () { return Promise.all([sb.from('courses').select('*'), sb.from('lessons').select('*').order('num'), sb.from('progress').select('*'), sb.from('progress_lang').select('*'), sb.from('task_times').select('*').limit(5000), sb.from('enrollment_langs').select('*')]).then(function (r) { r.forEach(ok); return {courses:r[0].data, lessons:r[1].data, progress:r[2].data, progress_lang:r[3].data, times:r[4].data, elangs:r[5].data}; }); },
@@ -440,7 +442,7 @@ function SupabaseBackend(url, key) {
     removeLang: function (cid, tg) { return this.addLang(cid, tg, true); },
     removeCourse: function (cid, langs) { var uid = cachedUser.id; return sb.from('enrollment_langs').upsert(langs.map(function (l) { return {user_id:uid, course_id:cid, target:l, hidden:true}; })).then(ok).then(function () { return sb.from('enrollments').delete().eq('user_id', uid).eq('course_id', cid).then(ok); }); },
     activateKey: function (code) { return sb.rpc('activate_key', {p_code:code.trim().toUpperCase()}).then(ok); },
-    myProgress: function (tg) { tg = tg || TARGET; if (!cachedUser) return Promise.resolve([]); var q = sb.from(tg === 'en' ? 'progress' : 'progress_lang').select('*').eq('user_id', cachedUser.id); if (tg !== 'en') q = q.eq('target', tg); return q.then(ok); },
+    myProgress: function (tg) { tg = tg || TARGET; return waitU().then(function () { if (!cachedUser) return []; var q = sb.from(tg === 'en' ? 'progress' : 'progress_lang').select('*').eq('user_id', cachedUser.id); if (tg !== 'en') q = q.eq('target', tg); return q.then(ok); }); },
     saveProgress: function (lessonId, score, answer) {
       if (!cachedUser) return Promise.resolve(false);
       var tb = TARGET === 'en' ? 'progress' : 'progress_lang', tg = TARGET;
