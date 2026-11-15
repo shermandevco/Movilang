@@ -1261,3 +1261,14 @@ html[data-course] #app{--red:var(--fx-course);--coral:var(--fx-course);--link:va
 html[data-theme="dark"] .ms2 .ms-out{color:#FF8A6B}
 .msheetw .lbox{max-height:88vh;overflow-y:auto}
 .film-meta b.owned,.pr.owned{color:var(--ok,#0E8A62)!important;font-weight:700}
+/* kabinet: zwijane maratony + wyszukiwanie */
+.cf-search{width:100%;margin:4px 0 10px}
+details.cfold{border:1px solid var(--line);border-radius:14px;padding:0;margin-bottom:8px;overflow:hidden}
+details.cfold>summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;font-weight:700}
+details.cfold>summary::-webkit-details-marker{display:none}
+details.cfold>summary::after{content:"›";transform:rotate(90deg);transition:transform .15s;color:var(--muted);font-size:20px;line-height:1}
+details.cfold[open]>summary::after{transform:rotate(-90deg)}
+.cf-t{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cf-m{margin-left:auto;font-weight:500;font-size:13px;color:var(--muted);white-space:nowrap}
+.cf-b{padding:0 14px 12px;display:grid;gap:8px}
+.cf-open{font-weight:600;font-size:14px}
