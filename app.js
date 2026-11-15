@@ -735,9 +735,12 @@ function viewCabinet() {
         if (inp.value.replace(/-/g, '').length !== 12) { msg.className = 'msg small err'; msg.textContent = t('Ключ має містити 12 символів.'); return; }
         API.activateKey(inp.value).then(function (res) {
           if (res.ok) { toast(t('Ключ активовано! Марафон відкрито.'));
-            pickTargetModal(tx({uk:'Якою мовою хочеш вивчати цей марафон?', pl:'W jakim języku chcesz uczyć się w tym maratonie?', en:'Which language do you want to learn in this marathon?'}), [], function (tg) {
-              API.myEnrollments().then(function (ids) { var cids = res.course_id ? [res.course_id] : ids; return Promise.all(cids.map(function (cid) { return API.addLang(cid, tg); })).then(function () { setLangs(tg, LANG); CAB_T = tg; if (res.course_id) location.hash = '#/course/' + res.course_id; else route(); }); });
-            }); } else { msg.className = 'msg small err'; msg.textContent = res.msg; }
+            /* без модалки: на iPhone вона не спрацьовувала — одразу додаємо поточну мову навчання */
+            var tg = (typeof TARGET === 'string' && TARGET) || 'en'; inp.value = '';
+            msg.className = 'msg small ok'; msg.textContent = t('Ключ активовано! Марафон відкрито.');
+            API.myEnrollments().then(function (ids) { var cids = res.course_id ? [res.course_id] : ids; return Promise.all(cids.map(function (cid) { return API.addLang(cid, tg).catch(function () {}); })); })
+              .catch(function () {}).then(function () { if (API.clearCache) API.clearCache(); setLangs(tg, LANG); CAB_T = tg; if (res.course_id) location.hash = '#/course/' + res.course_id; else { ROUTE_LAST = null; route(); } });
+          } else { msg.className = 'msg small err'; msg.textContent = res.msg; }
         }).catch(function (err) { msg.className = 'msg small err'; msg.textContent = err.message; });
       };
     });
