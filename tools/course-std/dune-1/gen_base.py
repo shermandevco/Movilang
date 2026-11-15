@@ -7,11 +7,11 @@ IDS = [l.strip() for l in open(os.path.join(HERE, '..', 'dune-1_ids.txt')) if l.
 M = re.compile(r'\[([^\]]+)\]')
 I = {'uk': 0, 'pl': 1, 'en': 2}
 ARCS = {1: ('Арка 1 · Каладан|Łuk 1 · Caladan|Arc 1 · Caladan', '🌊', 'Хвиля Каладану|Fala Caladanu|The Caladan Wave', 'Ти пізнав(ла) дім Атрідів на морському світі.|Poznałeś(-aś) ród Atrydów na oceanicznym świecie.|You came to know House Atreides on its ocean world.'),
-        2: ('Арка 2 · Випробування|Łuk 2 · Próba|Arc 2 · The Test', '🖐', 'Скринька болю|Skrzynka bólu|The Box of Pain', 'Ти бачив(ла), як Пол пройшов випробування і як дім вирушив у дорогу.|Widziałeś(-aś), jak Paul przeszedł próbę i jak ród wyruszył w drogę.|You saw Paul pass the test and the house set out on its journey.'),
-        3: ('Арка 3 · Арракіс|Łuk 3 · Arrakis|Arc 3 · Arrakis', '🏜', 'Пісок Арракіса|Piasek Arrakis|Sand of Arrakis', 'Ти ступив(ла) на найнебезпечнішу планету імперії.|Stanąłeś(-ęłaś) na najniebezpieczniejszej planecie imperium.|You set foot on the most dangerous planet in the empire.'),
-        4: ('Арка 4 · Прянощі|Łuk 4 · Przyprawa|Arc 4 · The Spice', '✨', 'Крупинка прянощів|Ziarnko przyprawy|A Grain of Spice', 'Ти дізнав(лася), чому за прянощі воює весь всесвіт.|Dowiedziałeś(-aś) się, dlaczego o przyprawę walczy cały wszechświat.|You learned why the whole universe fights over the spice.'),
-        5: ('Арка 5 · Зрада|Łuk 5 · Zdrada|Arc 5 · Betrayal', '🗡', 'Зламаний щит|Złamana tarcza|The Broken Shield', 'Ти пережив(ла) ніч, коли впав дім Атрідів.|Przetrwałeś(-aś) noc, w której upadł ród Atrydów.|You survived the night House Atreides fell.'),
-        6: ('Арка 6 · Пустеля|Łuk 6 · Pustynia|Arc 6 · The Desert', '🪱', 'Зуб піщаного черв\'яка|Ząb czerwia|The Sandworm\'s Tooth', 'Ти дійшов(ла) до фрименів і до кінця першої частини.|Dotarłeś(-aś) do Fremenów i do końca pierwszej części.|You reached the Fremen and the end of Part One.')}
+        2: ('Арка 2 · Арракін|Łuk 2 · Arrakin|Arc 2 · Arrakeen', '🏜', 'Крис-ніж|Kryształowy nóż|The Crysknife', 'Ти пережив(ла) перший місяць на найнебезпечнішій планеті імперії.|Przetrwałeś(-aś) pierwszy miesiąc na najniebezpieczniejszej planecie imperium.|You survived your first month on the most dangerous planet in the empire.'),
+        3: ('Арка 3 · Прянощі|Łuk 3 · Przyprawa|Arc 3 · The Spice', '✨', 'Крупинка прянощів|Ziarnko przyprawy|A Grain of Spice', 'Ти дізнав(лася), чому за прянощі воює весь всесвіт.|Dowiedziałeś(-aś) się, dlaczego o przyprawę walczy cały wszechświat.|You learned why the whole universe fights over the spice.'),
+        4: ('Арка 4 · Зрада|Łuk 4 · Zdrada|Arc 4 · Betrayal', '🗡', 'Зламаний щит|Złamana tarcza|The Broken Shield', 'Ти пережив(ла) ніч, коли впав дім Атрідів.|Przetrwałeś(-aś) noc, w której upadł ród Atrydów.|You survived the night House Atreides fell.'),
+        5: ('Арка 5 · Пустеля|Łuk 5 · Pustynia|Arc 5 · The Desert', '🌪', 'Око бурі|Oko burzy|The Eye of the Storm', 'Ти пройшов(ла) крізь бурю й пустелю разом із Полом.|Przeszedłeś(-aś) z Paulem przez burzę i pustynię.|You crossed the storm and the desert with Paul.'),
+        6: ('Арка 6 · Фримени|Łuk 6 · Fremeni|Arc 6 · The Fremen', '🪱', 'Зуб піщаного черв\'яка|Ząb czerwia|The Sandworm\'s Tooth', 'Ти дійшов(ла) до фрименів і до кінця першої частини.|Dotarłeś(-aś) do Fremenów i do końca pierwszej części.|You reached the Fremen and the end of Part One.')}
 
 def sp(t): a = [x.strip() for x in t.split('|')]; assert len(a) == 3, t; return a
 def clean(s): return M.sub(lambda m: m.group(1).split('/')[0], s)
@@ -26,6 +26,7 @@ for f in sorted(glob.glob(os.path.join(HERE, 'd[0-9][0-9].py'))):
 UI = {'uk': ('Відкривай слова, слухай вимову 🔊 і читай, хто і де це каже.', 'Otwieraj słowa, słuchaj wymowy 🔊 i czytaj, kto i gdzie to mówi.', 'Open the words, listen to the pronunciation 🔊 and read who says it and where.')}
 
 def glossary(tg, n, lab, voc, sents):
+    global n_cur
     k = I[tg]; L = sp(lab); items = []
     for v in voc.split(';'):
         a = sp(v); w = a[k]
@@ -38,7 +39,7 @@ def glossary(tg, n, lab, voc, sents):
             if idx is not None: break
         line = sents[idx or 0]
         ls = sp(line); full = [clean(x) for x in ls]
-        it = {'w': w, 'ipa': '', 'pos': '', 'lvl': 'B2', 'line': full[k], 'ex': full[k],
+        it = {'w': w, 'ipa': '', 'pos': '', 'lvl': 'B1' if n_cur < 19 else 'B2', 'line': full[k], 'ex': full[k],
               'who': full[0], 'who_pl': full[1], 'who_en': full[2]}
         if tg == 'en':
             it.update({'uk': a[0], 'uk_pl': a[1], 'uk_en': a[2]})
@@ -59,6 +60,7 @@ def arc_of(n): return min(6, (n - 1) // 6 + 1)
 out = []
 for n in range(1, 37):
     if n not in captured: continue
+    n_cur = n
     d, boss = captured[n]
     t, s = sp(d['title']), sp(d['scene'])
     base = {'num': n, 'id': IDS[n - 1], 'title': t[0], 'title_pl': t[1], 'title_en': t[2], 'scene': s[0], 'scene_pl': s[1], 'scene_en': s[2],
