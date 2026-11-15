@@ -679,6 +679,45 @@ function viewBuy() {
   return Promise.resolve();
 }
 
+try { if (API.sb) API.sb.auth.onAuthStateChange(function (ev) { if (ev === 'PASSWORD_RECOVERY' && location.hash !== '#/reset') location.hash = '#/reset'; }); } catch (e) {}
+function viewForgot() {
+  var L = function (u, p, e) { return tx({uk:u, pl:p, en:e}); };
+  $app.innerHTML = '<div class="page"><div class="authbox panel"><div class="eyebrow">' + L('Відновлення пароля', 'Odzyskiwanie hasła', 'Password reset') + '</div><h2 style="font-size:30px;margin-block:10px 12px">' + L('Забули пароль?', 'Nie pamiętasz hasła?', 'Forgot your password?') + '</h2>' +
+    '<p class="muted" style="margin-bottom:16px">' + L('Вкажи пошту акаунта — надішлемо посилання для нового пароля.', 'Podaj e-mail konta — wyślemy link do ustawienia nowego hasła.', 'Enter your account email and we’ll send a link to set a new password.') + '</p>' +
+    '<form class="form" id="fgForm" novalidate><label class="fl" for="fgEmail">' + L('Пошта', 'E-mail', 'Email') + '<input class="inp-s" id="fgEmail" type="email" autocomplete="email" required></label>' +
+    '<button class="btn btn-red" type="submit" style="justify-content:center">' + L('Надіслати посилання', 'Wyślij link', 'Send link') + '</button><div class="msg" id="fgMsg" role="status"></div></form>' +
+    '<p class="muted small" style="margin-top:14px"><a href="#/login">← ' + L('Назад до входу', 'Wróć do logowania', 'Back to log in') + '</a></p></div></div>';
+  document.getElementById('fgForm').onsubmit = function (e) {
+    e.preventDefault(); var email = document.getElementById('fgEmail').value.trim(), msg = document.getElementById('fgMsg'), btn = this.querySelector('button');
+    if (!/^\S+@\S+\.\S+$/.test(email)) { msg.className = 'msg err'; msg.textContent = t('Введи коректну пошту, напр. name@gmail.com'); return; }
+    if (API.mode === 'demo' || !API.sb) { msg.className = 'msg'; msg.textContent = L('У демо-режимі листи не надсилаються.', 'W trybie demo e-maile nie są wysyłane.', 'Emails are not sent in demo mode.'); return; }
+    btn.disabled = true; msg.className = 'msg'; msg.textContent = t('Зачекай…');
+    API.sb.auth.resetPasswordForEmail(email, {redirectTo: location.origin + '/#/reset'}).then(function (r) {
+      if (r.error && !/rate|limit|seconds/i.test(r.error.message)) throw r.error;
+      msg.className = 'msg ok'; msg.textContent = r.error ? L('Лист уже надіслано. Зачекай хвилину перед повторною спробою.', 'Link już wysłany. Poczekaj minutę przed kolejną próbą.', 'Link already sent. Wait a minute before trying again.') : L('Готово! Якщо акаунт з цією поштою існує, лист уже в дорозі. Перевір також «Спам».', 'Gotowe! Jeśli konto z tym adresem istnieje, link jest już w drodze. Sprawdź też folder Spam.', 'Done! If an account with this email exists, the link is on its way. Check your spam folder too.');
+    }).catch(function (err) { btn.disabled = false; msg.className = 'msg err'; msg.textContent = err.message || String(err); });
+  };
+  return Promise.resolve();
+}
+function viewReset() {
+  var L = function (u, p, e) { return tx({uk:u, pl:p, en:e}); };
+  $app.innerHTML = '<div class="page"><div class="authbox panel"><div class="eyebrow">' + L('Новий пароль', 'Nowe hasło', 'New password') + '</div><h2 style="font-size:30px;margin-block:10px 16px">' + L('Встанови новий пароль', 'Ustaw nowe hasło', 'Set a new password') + '</h2>' +
+    '<form class="form" id="rsForm" novalidate><label class="fl" for="rsP1">' + L('Новий пароль (мінімум 6 символів)', 'Nowe hasło (min. 6 znaków)', 'New password (min. 6 characters)') + '<input class="inp-s" id="rsP1" type="password" autocomplete="new-password" required></label>' +
+    '<label class="fl" for="rsP2">' + L('Повтори пароль', 'Powtórz hasło', 'Repeat password') + '<input class="inp-s" id="rsP2" type="password" autocomplete="new-password" required></label>' +
+    '<button class="btn btn-red" type="submit" style="justify-content:center">' + L('Зберегти пароль', 'Zapisz hasło', 'Save password') + '</button><div class="msg" id="rsMsg" role="status"></div></form></div></div>';
+  document.getElementById('rsForm').onsubmit = function (e) {
+    e.preventDefault(); var a = document.getElementById('rsP1').value, b = document.getElementById('rsP2').value, msg = document.getElementById('rsMsg');
+    if (a.length < 6) { msg.className = 'msg err'; msg.textContent = t('Пароль має містити щонайменше 6 символів.'); return; }
+    if (a !== b) { msg.className = 'msg err'; msg.textContent = L('Паролі не збігаються.', 'Hasła nie są takie same.', 'Passwords don’t match.'); return; }
+    if (!API.sb) { msg.className = 'msg err'; msg.textContent = 'Demo'; return; }
+    msg.className = 'msg'; msg.textContent = t('Зачекай…');
+    API.sb.auth.updateUser({password: a}).then(function (r) {
+      if (r.error) throw r.error;
+      return API.getUser().then(function (u) { USER = u; renderNav(); toast(L('Пароль змінено!', 'Hasło zmienione!', 'Password changed!')); location.hash = '#/cabinet'; });
+    }).catch(function (err) { msg.className = 'msg err'; msg.textContent = /session|JWT|missing/i.test(err.message || '') ? L('Посилання застаріло. Запроси нове.', 'Link wygasł. Poproś o nowy.', 'The link has expired. Request a new one.') + ' ' : (err.message || String(err)); if (/session|JWT|missing/i.test(err.message || '')) msg.innerHTML += '<a href="#/forgot">' + L('Надіслати знову', 'Wyślij ponownie', 'Send again') + '</a>'; });
+  };
+  return Promise.resolve();
+}
 function viewAuth(mode) {
   if (USER) { location.hash = '#/cabinet'; return Promise.resolve(); }
   var reg = mode === 'register';
@@ -688,6 +727,7 @@ function viewAuth(mode) {
     (reg ? '<label class="fl" for="aGender">' + tx({uk:'Як до тебе звертатися в історіях (необов\'язково)', pl:'Jak zwracać się do ciebie w historiach (opcjonalnie)', en:'How stories address you (optional)'}) + '<select class="inp-s" id="aGender"><option value="">' + tx({uk:'Не вказувати', pl:'Nie podawać', en:'Prefer not to say'}) + '</option><option value="m">' + tx({uk:'Він (я зробив)', pl:'On (zrobiłem)', en:'He'}) + '</option><option value="f">' + tx({uk:'Вона (я зробила)', pl:'Ona (zrobiłam)', en:'She'}) + '</option></select></label>' : '') +
     t('<label class="fl" for="aEmail">Пошта<input class="inp-s" id="aEmail" type="email" autocomplete="email" required></label>') +
     t('<label class="fl" for="aPass">Пароль') + (reg ? t(' (мінімум 6 символів)') : '') + '<input class="inp-s" id="aPass" type="password" autocomplete="' + (reg ? 'new-password' : 'current-password') + '" required></label>' +
+    (reg ? '' : '<a href="#/forgot" class="small" style="justify-self:end;margin-top:-4px">' + tx({uk:'Забули пароль?', pl:'Nie pamiętasz hasła?', en:'Forgot password?'}) + '</a>') +
     '<button class="btn btn-red" type="submit" style="justify-content:center">' + (reg ? t('Зареєструватися') : t('Увійти')) + '</button><div class="msg" id="aMsg" role="status"></div></form>' +
     '<p class="muted small" style="margin-top:14px">' + (reg ? t('Вже є акаунт? <a href="#/login">Увійти</a>') : t('Ще немає акаунта? <a href="#/register">Створити кабінет</a>')) + '</p>' +
     (API.mode === 'demo' && !reg ? t('<p class="hint" style="margin-top:10px">Демо: адмін admin@movielang.demo / admin123, учень olena@example.com / demo123</p>') : '') + '</div></div>';
@@ -3537,6 +3577,8 @@ function route() {
     case 'buy': p = viewBuy(); break;
     case 'trial': p = viewTrial(); break;
     case 'login': p = viewAuth('login'); break;
+    case 'forgot': p = viewForgot(); break;
+    case 'reset': p = viewReset(); break;
     case 'register': p = viewAuth('register'); break;
     case 'cabinet': p = viewCabinet(); break;
     case 'chats': p = viewChats(parts[1]); break;
@@ -3586,7 +3628,8 @@ if (/[?&]preview=1/.test(location.search)) document.documentElement.classList.ad
     if (!started) {
       applyCustomTheme();
       var h = location.hash;
-      if (/access_token=|type=signup|#\/confirmed/.test(h)) { history.replaceState(null, '', location.pathname + (USER ? '#/cabinet' : '#/login')); toast(USER ? t('Пошту підтверджено! Ласкаво просимо до MoviLang.') : t('Пошту підтверджено! Тепер увійди.')); }
+      if (/type=recovery/.test(h)) { history.replaceState(null, '', location.pathname + '#/reset'); }
+      else if (/access_token=|type=signup|#\/confirmed/.test(h)) { history.replaceState(null, '', location.pathname + (USER ? '#/cabinet' : '#/login')); toast(USER ? t('Пошту підтверджено! Ласкаво просимо до MoviLang.') : t('Пошту підтверджено! Тепер увійди.')); }
       else if (/error_description=/.test(h)) { history.replaceState(null, '', location.pathname + '#/login'); toast(t('Посилання недійсне або застаріле. Увійди або зареєструйся ще раз.'), 'err'); }
       renderNav(); route();
     } else if (uChanged || sChanged) {
