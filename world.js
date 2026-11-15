@@ -246,6 +246,43 @@ window.MOVILANG_WORLDS = {
     }
   },
 
+  'dune-1': {
+    theme: null,
+    points: {icon: '💧', uk: 'краплі води', pl: 'krople wody', en: 'drops of water'},
+    ritual: {
+      icon: '🏜',
+      title: {uk: 'Твоє місце на Арракісі', pl: 'Twoje miejsce na Arrakis', en: 'Your place on Arrakis'},
+      intro: {uk: 'Гарячий вітер, жовте небо, далекий гуркіт піску. П\'ять питань англійською — і пустеля покаже, з ким ти підеш.', pl: 'Gorący wiatr, żółte niebo, daleki pomruk piasku. Pięć pytań po angielsku — i pustynia pokaże, z kim pójdziesz.', en: 'A hot wind, a yellow sky, the distant rumble of sand. Five questions, and the desert shows you whose side you are on.'},
+      reveal: {uk: 'Пісок затихає. Твій шлях:', pl: 'Piasek cichnie. Twoja droga:', en: 'The sand goes quiet. Your path:'},
+      questions: [
+        {q: 'What matters most to you?', hint: {uk: 'Що для тебе найважливіше?', pl: 'Co jest dla ciebie najważniejsze?', en: ''},
+          a: [['Honour and loyalty.', 'atreides'], ['Freedom and the desert.', 'fremen'], ['Secret knowledge.', 'bene'], ['Maps and discoveries.', 'guild']]},
+        {q: 'Where would you like to live?', hint: {uk: 'Де б ти хоті(в/ла) жити?', pl: 'Gdzie chciał(a)byś mieszkać?', en: ''},
+          a: [['In a castle above the ocean.', 'atreides'], ['In a cave deep in the desert.', 'fremen'], ['In a quiet school full of old books.', 'bene'], ['On a ship between the stars.', 'guild']]},
+        {q: 'You are lost in the desert. You…', hint: {uk: 'Ти загуби(вся/лася) в пустелі. Ти…', pl: 'Zgubił(a)ś się na pustyni. Ty…', en: ''},
+          a: [['…wait for my friends to find me.', 'atreides'], ['…walk at night with an uneven step.', 'fremen'], ['…stay calm and control my fear.', 'bene'], ['…look at the stars and find the way.', 'guild']]},
+        {q: 'Choose one thing.', hint: {uk: 'Обери одну річ.', pl: 'Wybierz jedną rzecz.', en: ''},
+          a: [['A sword.', 'atreides'], ['A crysknife.', 'fremen'], ['A secret word.', 'bene'], ['A map.', 'guild']]},
+        {q: 'Finish the sentence: “Fear is…”', hint: {uk: 'Закінчи речення: «Страх — це…»', pl: 'Dokończ zdanie: „Strach to…”', en: ''},
+          a: [['…something I face for my people.', 'atreides'], ['…a waste of water.', 'fremen'], ['…the mind-killer.', 'bene'], ['…what you feel before a long journey.', 'guild']]}
+      ]
+    },
+    factions: {
+      atreides: {icon: '🦅', color: '#2f6b3a', uk: 'Дім Атрідів', pl: 'Ród Atrydów', en: 'House Atreides', motto: {uk: 'Честь і вірність', pl: 'Honor i wierność', en: 'Honour and loyalty'}},
+      fremen: {icon: '🏜', color: '#b5762b', uk: 'Фримени', pl: 'Fremeni', en: 'The Fremen', motto: {uk: 'Вода — це життя', pl: 'Woda to życie', en: 'Water is life'}},
+      bene: {icon: '👁', color: '#3b2f4f', uk: 'Бене Ґессерит', pl: 'Bene Gesserit', en: 'The Bene Gesserit', motto: {uk: 'Страх — убивця розуму', pl: 'Strach zabija umysł', en: 'Fear is the mind-killer'}},
+      guild: {icon: '🌌', color: '#1f4b73', uk: 'Картографи Гільдії', pl: 'Kartografowie Gildii', en: 'Guild Cartographers', motto: {uk: 'Кожна дорога має мапу', pl: 'Każda droga ma mapę', en: 'Every road has a map'}}
+    },
+    standings: {uk: 'Рада пустелі', pl: 'Rada pustyni', en: 'The desert council'},
+    collection: {uk: 'Мапи Арракіса', pl: 'Mapy Arrakis', en: 'Maps of Arrakis'}, cardIcon: '🗺️',
+    artifacts: {uk: 'Скарби пустелі', pl: 'Skarby pustyni', en: 'Treasures of the desert'},
+    journal: {
+      title: {uk: 'Журнал картографа', pl: 'Dziennik kartografa', en: 'The cartographer\'s journal'}, icon: '🧭',
+      open: 'From the journal:', sign: '— the apprentice cartographer',
+      lines: ['Today: {scene_en}. Word for the map: “{w1}”.', 'New words for the journal: {w1}, {w2}, {w3}.']
+    }
+  },
+
   'game-of-thrones-1': {
     theme: null,
     points: {icon: '🪶', uk: 'сторінки хроніки', pl: 'strony kroniki', en: 'chronicle pages'},
