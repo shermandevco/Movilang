@@ -78,5 +78,5 @@ for n in range(1, 37):
     base['variants'] = v
     out.append(base)
 os.makedirs(os.path.join(ROOT, 'content', 'dune'), exist_ok=True)
-json.dump(out, open(os.path.join(ROOT, 'content', 'dune', 'got1.json'), 'w'), ensure_ascii=False)
-print(len(out), 'lessons ->', os.path.join(ROOT, 'content', 'dune', 'got1.json'))
+json.dump(out, open(os.path.join(ROOT, 'content', 'dune', 'dune1.json'), 'w'), ensure_ascii=False)
+print(len(out), 'lessons ->', os.path.join(ROOT, 'content', 'dune', 'dune1.json'))
