@@ -1260,3 +1260,4 @@ html[data-course] #app{--red:var(--fx-course);--coral:var(--fx-course);--link:va
 .ms2 .ms-out{margin-top:12px;min-height:48px;border:0;background:none;color:#C2391C;font:600 16px var(--f-body,inherit);cursor:pointer}
 html[data-theme="dark"] .ms2 .ms-out{color:#FF8A6B}
 .msheetw .lbox{max-height:88vh;overflow-y:auto}
+.film-meta b.owned,.pr.owned{color:var(--ok,#0E8A62)!important;font-weight:700}

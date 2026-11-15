@@ -584,7 +584,18 @@ function heroSvg() {
   return '<svg class="scene" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><radialGradient id="glow" cx="62%" cy="40%" r="45%"><stop offset="0" stop-color="#ffd27a" stop-opacity=".75"/><stop offset=".5" stop-color="#8b5cf6" stop-opacity=".25"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient><linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a1230"/><stop offset="1" stop-color="#050409"/></linearGradient></defs><rect width="800" height="500" fill="url(#floor)"/><rect width="800" height="500" fill="url(#glow)"/><rect x="90" y="70" width="150" height="190" rx="75" fill="#0c0a1a" stroke="#3a2f63" stroke-width="4"/><g transform="translate(470 150) rotate(-12)"><rect width="140" height="92" rx="6" fill="#efe2c4"/><path d="M0 6 L70 54 L140 6" fill="none" stroke="#c9b48a" stroke-width="3"/><circle cx="70" cy="56" r="15" fill="#b3202f"/></g><g fill="#ffe7a8"><circle cx="440" cy="120" r="2.5"/><circle cx="640" cy="110" r="2"/><circle cx="610" cy="280" r="2.5"/></g><g fill="#05040a"><circle cx="300" cy="250" r="44"/><path d="M210 500 C210 380 240 310 300 300 C360 310 392 380 392 500 Z"/></g></svg>';
 }
 function isFreeCourse(c) { return !!c && /^\s*(0|free|darmo|za darmo|безкошт)/i.test(String(c.price || '')); }
-function priceTxt(c) { return isFreeCourse(c) ? tx({uk:'Безкоштовно', pl:'Za darmo', en:'Free'}) : (c.price || ''); }
+/* курси на акаунті: у каталозі замість ціни — «Активовано» */
+var OWNED = {};
+function ownedTxt() { return tx({uk:'Активовано ✓', pl:'Aktywowano ✓', en:'Activated ✓'}); }
+(function () {
+  var me = API.myEnrollments;
+  function paint() { Object.keys(OWNED).forEach(function (id) { document.querySelectorAll('a[href="#/course/' + id + '"] .film-meta b, a[href="#/course/' + id + '"] .pr').forEach(function (el) { if (el.textContent !== ownedTxt()) { el.textContent = ownedTxt(); el.classList.add('owned'); } }); }); }
+  API.myEnrollments = function () { return me.apply(API, arguments).then(function (ids) { var o = {}; (ids || []).forEach(function (id) { o[id] = 1; }); OWNED = o; setTimeout(paint, 0); return ids; }); };
+  new MutationObserver(function () { if (Object.keys(OWNED).length) paint(); }).observe(document.getElementById('app') || document.body, {childList:true, subtree:true});
+  window.addEventListener('hashchange', function () { if (typeof USER !== 'undefined' && USER) API.myEnrollments().catch(function () {}); else OWNED = {}; });
+  setTimeout(function () { if (typeof USER !== 'undefined' && USER) API.myEnrollments().catch(function () {}); }, 1200);
+})();
+function priceTxt(c) { if (c && OWNED[c.id]) return ownedTxt(); return isFreeCourse(c) ? tx({uk:'Безкоштовно', pl:'Za darmo', en:'Free'}) : (c.price || ''); }
 function posterHtml(c, small) {
   var cls = POSTER_CLASSES.indexOf(c.poster) > -1 ? c.poster : 'p1', art = c.poster_url && /^https:\/\//.test(c.poster_url) ? c.poster_url.replace(/[()'"\s]/g, encodeURIComponent) : POSTER_ART.indexOf(c.slug) > -1 ? 'assets/posters/' + c.slug + '.svg?v=1' : '';
   return '<div class="poster ' + cls + (art ? ' art" style="background-image:linear-gradient(to top,#000c 0,#0006 30%,#0000 55%),url(' + art + ')' + (small ? ';width:120px;flex:0 0 120px;padding:10px' : '') + '"' : '"' + (small ? ' style="width:120px;flex:0 0 120px;padding:10px"' : '')) + '><span class="perf l"></span><span class="perf r"></span>' +
