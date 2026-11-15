@@ -65,7 +65,7 @@ function ttName(k) { return (TT_L[LANG] && TT_L[LANG][k]) || TASK_TYPES[k] || k;
 var TASK_TYPES = { reading:'READING', intro:'START', match:'MATCH', order:'WORD ORDER', type:'TYPE IT', tf:'TRUE / FALSE', vocabulary:'VOCABULARY', listening:'LISTENING', subtitles:'SUBTITLES', grammar:'GRAMMAR', speaking:'SPEAKING', quiz:'MINI QUIZ', final:'FINAL', cards:'CHARACTERS', glossary:'SCENE GLOSSARY', quest:'QUEST', drill:'DRILL' };
 function isInfo(k) { return k === 'intro' || k === 'cards' || k === 'glossary'; }
 var POSTER_CLASSES = ['p1','p2','p3','p4','p5','p6','p7','p8'];
-var POSTER_ART = ['cars','game-of-thrones-1','harry-potter-1','vampire-diaries-1','home-alone','zootopia','friends-s1','himym-s1'];
+var POSTER_ART = ['cars','game-of-thrones-1','dune-1','harry-potter-1','vampire-diaries-1','home-alone','zootopia','friends-s1','himym-s1'];
 
 
 /* ================= i18n + theme ================= */
@@ -850,7 +850,7 @@ function adminVoices(ls) {
   };
 }
 /* ---------- illustrations (original SVG, no film stills) ---------- */
-var ILLU_KEYS = ['castle','stairs','snake','letter','cake','alley','wand','train','hat','potion','broom','troll','pitch','mirror','forest','chess','stone','owl','tomb','crow','ring','vervain','diary','candles','manor','comet'];
+var ILLU_KEYS = ['castle','stairs','snake','letter','cake','alley','wand','train','hat','potion','broom','troll','pitch','mirror','forest','chess','stone','owl','tomb','crow','ring','vervain','diary','candles','manor','comet','desert'];
 function illu(key) {
   var g = '#f1c27d', c = '#efe2c4', d = '#0b0b14', a = '#e8253a';
   var art = {
@@ -873,6 +873,7 @@ function illu(key) {
     stone: '<path d="M320 70l60 60-60 120-60-120z" fill="' + a + '" stroke="#ff9aa8" stroke-width="3"/><path d="M260 130h120M320 70l-20 60 20 120 20-120z" stroke="#ff9aa8" stroke-width="2" fill="none" opacity=".7"/>',
     owl: '<ellipse cx="320" cy="170" rx="70" ry="85" fill="#e8e1d8"/><circle cx="295" cy="140" r="20" fill="#fff"/><circle cx="345" cy="140" r="20" fill="#fff"/><circle cx="295" cy="140" r="9" fill="' + d + '"/><circle cx="345" cy="140" r="9" fill="' + d + '"/><path d="M312 165l8 14 8-14z" fill="' + g + '"/><rect x="380" y="200" width="70" height="44" rx="4" fill="' + c + '" transform="rotate(-12 415 222)"/>',
     tomb: '<path d="M210 260V150q110-90 220 0v110z" fill="#1a1626" stroke="' + g + '" stroke-width="4"/><path d="M270 260v-80q50-40 100 0v80" fill="' + d + '" stroke="' + c + '" stroke-width="3"/><path d="M320 120v-30M305 105h30" stroke="' + g + '" stroke-width="4"/><path d="M120 262h400" stroke="#4a4560" stroke-width="4"/><g fill="#3d5a3a"><path d="M150 262q10-40 25 0z"/><path d="M470 262q12-50 28 0z"/></g>',
+    desert: '<circle cx="460" cy="70" r="40" fill="' + c + '" opacity=".9"/><path d="M0 220q120-60 240-10t240-20 160 10v60H0z" fill="' + d + '" opacity=".55"/><path d="M0 250q150-50 300-5t340-15v40H0z" fill="' + d + '"/><path d="M120 236q40-18 80 0t80 0" stroke="' + a + '" stroke-width="4" fill="none" stroke-dasharray="6 8"/>',
     crow: '<circle cx="470" cy="80" r="42" fill="' + c + '" opacity=".85"/><path d="M180 230q120-30 260 0" stroke="#4a3a2a" stroke-width="10" fill="none"/><path d="M300 215q-10-45 25-70q30-15 55 5l25-5-20 18q5 40-30 55z" fill="' + d + '" stroke="#26203a" stroke-width="2"/><path d="M330 175l-55 25 30 5z" fill="' + d + '"/><circle cx="372" cy="158" r="3" fill="' + a + '"/>',
     ring: '<ellipse cx="320" cy="170" rx="90" ry="70" fill="none" stroke="' + g + '" stroke-width="14"/><ellipse cx="320" cy="170" rx="90" ry="70" fill="none" stroke="#fff6" stroke-width="2"/><path d="M285 85l35-35 35 35-35 30z" fill="#2a49c9" stroke="' + g + '" stroke-width="4"/><path d="M320 50v65M285 85h70" stroke="#9fb2ff" stroke-width="1.5" opacity=".6"/>',
     vervain: '<path d="M300 110h40v20q30 15 30 60v60q0 15-15 15h-70q-15 0-15-15v-60q0-45 30-60z" fill="#ffffff14" stroke="' + c + '" stroke-width="3"/><path d="M280 200h80v50q0 10-10 10h-60q-10 0-10-10z" fill="#7b5bd6" opacity=".7"/><rect x="295" y="92" width="50" height="20" rx="4" fill="#6b4a2a"/><g stroke="#6fbf73" stroke-width="3" fill="none"><path d="M430 260q-10-80 20-160"/><path d="M445 160l20-15M440 200l-22-12M450 125l18-18"/></g><g fill="#a98bff"><circle cx="452" cy="98" r="6"/><circle cx="468" cy="142" r="5"/><circle cx="416" cy="186" r="5"/><circle cx="470" cy="104" r="4"/></g>',
@@ -3076,7 +3077,7 @@ function wBindCards(root) {
 }
 
 /* dzienniki kursów (300 KB) ładują się po starcie strony, a nie razem z nią */
-var JOURNAL_FILES = ['hp:2', 'tvd:2', 'himym:2', 'friends:2', 'homealone:2', 'zootopia:2', 'cars:2', 'got:1'], JOURNALS_P = null;
+var JOURNAL_FILES = ['hp:2', 'tvd:2', 'himym:2', 'friends:2', 'homealone:2', 'zootopia:2', 'cars:2', 'got:1', 'dune:1'], JOURNALS_P = null;
 function loadJournals() {
   if (!JOURNALS_P) JOURNALS_P = Promise.all(JOURNAL_FILES.map(function (f) { return new Promise(function (res) { var s = document.createElement('script'), a = f.split(':'); s.src = 'content/journal-' + a[0] + '.js?v=' + a[1]; s.async = true; s.onload = s.onerror = function () { res(); }; document.head.appendChild(s); }); }));
   return JOURNALS_P;

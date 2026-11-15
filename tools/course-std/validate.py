@@ -4,7 +4,7 @@ import json, re, sys
 
 CYR = re.compile(r'[Ѐ-ӿ]')
 TRI = ['label', 'q', 'ins', 'tip', 'title', 'text', 'exp', 'tr', 'tag', 'scene']
-IMG = set('castle stairs snake letter cake alley wand train hat potion broom troll pitch mirror forest chess stone owl tomb crow ring vervain diary candles manor comet'.split())
+IMG = set('castle stairs snake letter cake alley wand train hat potion broom troll pitch mirror forest chess stone owl tomb crow ring vervain diary candles manor comet desert'.split())
 
 def check(path):
     E, W = [], []
