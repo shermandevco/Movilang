@@ -1,0 +1,15 @@
+1 uk стажист=стажиста/стажистом
+1 uk стіл=столи/столом
+1 uk справа=справи/справою
+1 uk попередження=попереджень/попередженням
+1 uk звертай=звертати/звертав
+1 pl stażystą=stażysta/stażysty
+1 pl biurko=biurka/biurkiem
+1 pl akta=aktach/aktami
+1 pl ostrzeżenie=ostrzeżenia/ostrzeżeniem
+1 pl zwracaj=zwracać/zwracał
+1 en trainee=trainees/training
+1 en desk=desks/desk's
+1 en case file=case files/case file's
+1 en warning=warnings/warned
+1 en pay=paid/paying
