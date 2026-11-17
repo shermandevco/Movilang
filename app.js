@@ -828,8 +828,7 @@ function viewCourse(id) {
         var inner = '<li class="' + (isDone ? 'done' : '') + '"><span class="lnum">' + (isDone ? '✓ ' : '') + String(l.num).padStart(2, '0') + '</span><span class="ltitle">' + esc(tr(l, 'title')) + '<small>' + esc(lGram(l)) + (free0 && !enrolled ? t(' · безкоштовно') : '') + (!avail ? ' · ' + t('Скоро цією мовою') + ' ' + FLAG[TARGET] : '') + '</small></span>' + (open ? (isDone ? '<b class="score">' + esc(scoreTxt(isDone)) + '</b>' : '<span class="lock" style="color:var(--neon)">▶</span>') : '<span class="lock">🔒</span>') + '</li>';
         return arcH + (open ? '<a class="lesson-link" href="#/lesson/' + esc(l.id) + '">' + inner + '</a>' : inner);
       }).join('') + '</ul>' : t('<div class="empty" style="margin-top:20px">Уроки цього марафону скоро з\'являться.</div>')) +
-      '</div><div class="panel tt-panel' + (lsGet('ml_tt_hide', false) ? ' tt-off' : '') + '"><div class="tt-head"><h3>' + tx({uk:'Типи завдань у курсі', pl:'Typy zadań w kursie', en:'Task types in this course'}) + '</h3><button type="button" class="btn btn-ghost btn-sm" id="ttToggle" aria-expanded="' + !lsGet('ml_tt_hide', false) + '">' + (lsGet('ml_tt_hide', false) ? tx({uk:'Показати', pl:'Pokaż', en:'Show'}) : tx({uk:'Сховати', pl:'Ukryj', en:'Hide'})) + '</button></div><div class="task-types">' + Object.keys(types).map(function (k) { var nm = ttName(k); if (!nm || nm === 'undefined') nm = k; return '<div class="ttype"><span class="k q">' + esc(k.slice(0, 2).toUpperCase()) + '</span><div><b>' + esc(nm) + '</b></div></div>'; }).join('') + '</div></div></div></div>';
-    var ttb = document.getElementById('ttToggle'); if (ttb) ttb.onclick = function () { var pn = ttb.closest('.tt-panel'), off = !pn.classList.contains('tt-off'); pn.classList.toggle('tt-off', off); lsSet('ml_tt_hide', off); ttb.setAttribute('aria-expanded', String(!off)); ttb.textContent = off ? tx({uk:'Показати', pl:'Pokaż', en:'Show'}) : tx({uk:'Сховати', pl:'Ukryj', en:'Hide'}); };
+      '</div><div class="panel tt-panel"><div class="tt-head"><h3>' + tx({uk:'Типи завдань у курсі', pl:'Typy zadań w kursie', en:'Task types in this course'}) + '</h3></div><div class="task-types">' + Object.keys(types).map(function (k) { var nm = ttName(k); if (!nm || nm === 'undefined') nm = k; return '<div class="ttype"><span class="k q">' + esc(k.slice(0, 2).toUpperCase()) + '</span><div><b>' + esc(nm) + '</b></div></div>'; }).join('') + '</div></div></div></div>';
     var af = document.getElementById('admFill');
     if (af) { var avIds = ls.filter(function (x) { return !!lessonTasks(x); }).map(function (x) { return x.id; });
       var pick = function () { var s = document.getElementById('admLes').value; return s ? [s] : avIds; };
@@ -3915,7 +3914,7 @@ function fxCourse(c) {
 }
 function fxRoute() {
   var h = location.hash, r = document.documentElement, les = /^#\/lesson\//.test(h);
-  r.classList.toggle('fx-focus', les); r.classList.remove('fx-side');
+  r.classList.toggle('fx-focus', les); r.classList.toggle('fx-side', les && window.innerWidth > 900 && lsGet('ml_fx_side', '1') !== '0');
   if (!les && !/^#\/course\//.test(h)) fxCourse(null);
   var n = document.querySelector('nav.top'); if (n) n.classList.remove('nav-peek');
 }
@@ -3941,7 +3940,7 @@ function fxEnhance() {
       bar = document.createElement('div'); bar.id = 'fxFocusBar'; bar.className = 'fx-fbar';
       bar.innerHTML = '<a class="fx-x" href="' + (back ? back.getAttribute('href') : '#/') + '" aria-label="' + esc(L3('Вийти з уроку', 'Wyjdź z lekcji', 'Leave the lesson')) + '">✕</a><div class="fx-fprog"><i></i></div><button type="button" class="fx-side-b" id="fxSideB">☰ <span>' + L3('Завдання', 'Zadania', 'Tasks') + '</span></button>';
       pl.parentNode.insertBefore(bar, pl.parentNode.firstChild);
-      bar.querySelector('#fxSideB').onclick = function () { document.documentElement.classList.toggle('fx-side'); };
+      bar.querySelector('#fxSideB').onclick = function () { var on = document.documentElement.classList.toggle('fx-side'); if (window.innerWidth > 900) lsSet('ml_fx_side', on ? '1' : '0'); };
     }
     if (bar) { var steps = app.querySelectorAll('.tside .tstep'), done = app.querySelectorAll('.tside .tstep.ok,.tside .tstep.bad').length; var fi = bar.querySelector('.fx-fprog i'); if (fi && steps.length) fi.style.width = Math.round(done / steps.length * 100) + '%'; }
   }
