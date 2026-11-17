@@ -1272,3 +1272,8 @@ details.cfold[open]>summary::after{transform:rotate(-90deg)}
 .cf-m{margin-left:auto;font-weight:500;font-size:13px;color:var(--muted);white-space:nowrap}
 .cf-b{padding:0 14px 12px;display:grid;gap:8px}
 .cf-open{font-weight:600;font-size:14px}
+/* typy zadań: zwijany panel */
+.tt-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:18px}
+.tt-head h3{margin:0}
+.tt-panel.tt-off .task-types{display:none}
+.tt-panel.tt-off .tt-head{margin-bottom:0}

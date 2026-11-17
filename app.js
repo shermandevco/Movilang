@@ -817,7 +817,7 @@ function viewCourse(id) {
     setAmbient(ambTheme(c)); if (typeof fxCourse === 'function') fxCourse(c);
     if (!c) { $app.innerHTML = t('<div class="page"><div class="empty">Курс не знайдено. <a href="#/catalog">До каталогу</a></div></div>'); return; }
     r[3].forEach(function (p) { done[p.lesson_id] = p; });
-    var types = {}; ls.forEach(function (l) { (l.tasks || []).forEach(function (t) { types[t.type] = 1; }); });
+    var types = {}; ls.forEach(function (l) { (l.tasks || []).forEach(function (t) { var k = t && t.type; if (k && typeof k === 'string' && k !== 'undefined') types[k] = 1; }); });
     $app.innerHTML = '<div class="page"><div class="mcard"><div class="panel"><div class="mhead">' + posterHtml(c, true) + '<div class="mhead-info"><div class="badges"><span class="badge hot">' + esc(c.level) + '</span><span class="badge">' + ls.length + t(' уроків</span><span class="badge">') + (c.kind === 'series' ? t('серіал') : t('фільм')) + '</span>' + (enrolled ? t('<span class="badge" style="color:var(--ok)">доступ відкрито</span>') : '') + '</div>' +
       '<h2 style="font-size:clamp(24px,3.4vw,36px)">' + esc(tr(c, 'title')) + '</h2><p class="muted">' + esc(tr(c, 'description')) + '</p>' +
       (enrolled ? '' : t('<div class="row"><a class="btn btn-red" href="#/buy">Купити ключ · ') + esc(c.price) + '</a>' + (USER ? t('<a class="btn btn-ghost" href="#/cabinet">Активувати ключ</a>') : t('<a class="btn btn-ghost" href="#/register">Створити кабінет</a>')) + '</div>') + '</div></div>' +
@@ -828,7 +828,8 @@ function viewCourse(id) {
         var inner = '<li class="' + (isDone ? 'done' : '') + '"><span class="lnum">' + (isDone ? '✓ ' : '') + String(l.num).padStart(2, '0') + '</span><span class="ltitle">' + esc(tr(l, 'title')) + '<small>' + esc(lGram(l)) + (free0 && !enrolled ? t(' · безкоштовно') : '') + (!avail ? ' · ' + t('Скоро цією мовою') + ' ' + FLAG[TARGET] : '') + '</small></span>' + (open ? (isDone ? '<b class="score">' + esc(scoreTxt(isDone)) + '</b>' : '<span class="lock" style="color:var(--neon)">▶</span>') : '<span class="lock">🔒</span>') + '</li>';
         return arcH + (open ? '<a class="lesson-link" href="#/lesson/' + esc(l.id) + '">' + inner + '</a>' : inner);
       }).join('') + '</ul>' : t('<div class="empty" style="margin-top:20px">Уроки цього марафону скоро з\'являться.</div>')) +
-      t('</div><div class="panel"><h3 style="margin-bottom:18px">Типи завдань у курсі</h3><div class="task-types">') + Object.keys(types).map(function (t) { return '<div class="ttype"><span class="k q">' + esc(t.slice(0, 2).toUpperCase()) + '</span><div><b>' + esc(ttName(t)) + '</b></div></div>'; }).join('') + '</div></div></div></div>';
+      '</div><div class="panel tt-panel' + (lsGet('ml_tt_hide', false) ? ' tt-off' : '') + '"><div class="tt-head"><h3>' + t('Типи завдань у курсі') + '</h3><button type="button" class="btn btn-ghost btn-sm" id="ttToggle" aria-expanded="' + !lsGet('ml_tt_hide', false) + '">' + (lsGet('ml_tt_hide', false) ? tx({uk:'Показати', pl:'Pokaż', en:'Show'}) : tx({uk:'Сховати', pl:'Ukryj', en:'Hide'})) + '</button></div><div class="task-types">' + Object.keys(types).map(function (k) { var nm = ttName(k); if (!nm || nm === 'undefined') nm = k; return '<div class="ttype"><span class="k q">' + esc(k.slice(0, 2).toUpperCase()) + '</span><div><b>' + esc(nm) + '</b></div></div>'; }).join('') + '</div></div></div></div>';
+    var ttb = document.getElementById('ttToggle'); if (ttb) ttb.onclick = function () { var pn = ttb.closest('.tt-panel'), off = !pn.classList.contains('tt-off'); pn.classList.toggle('tt-off', off); lsSet('ml_tt_hide', off); ttb.setAttribute('aria-expanded', String(!off)); ttb.textContent = off ? tx({uk:'Показати', pl:'Pokaż', en:'Show'}) : tx({uk:'Сховати', pl:'Ukryj', en:'Hide'}); };
     var af = document.getElementById('admFill');
     if (af) { var avIds = ls.filter(function (x) { return !!lessonTasks(x); }).map(function (x) { return x.id; });
       var pick = function () { var s = document.getElementById('admLes').value; return s ? [s] : avIds; };
@@ -4240,7 +4241,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEv
       var showG = function (n) {
         groups.forEach(function (gg, i) { gg.els.forEach(function (el) { el.hidden = i !== n || el.classList.contains('arc-h'); el.style.display = el.hidden ? 'none' : ''; }); });
         Array.prototype.forEach.call(tabs.children, function (bt, i) { bt.setAttribute('aria-selected', String(i === n)); });
-        var act = tabs.children[n]; if (act && act.scrollIntoView && tabs.scrollWidth > tabs.clientWidth) tabs.scrollLeft = Math.max(0, act.offsetLeft - 16);
+        
       };
       tabs.onclick = function (e) { var bt = e.target.closest('button'); if (bt) showG(+bt.dataset.g); };
       showG(cur);

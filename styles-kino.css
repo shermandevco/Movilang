@@ -122,3 +122,6 @@ html[data-skin="3"][data-theme="dark"]{
   html.fx-focus .tcard:has(.tfb.ok:not(:empty)) #tnext,html.fx-focus .tcard:has(.tfb.err:not(:empty)) #tnext{background:#0E0A1A;color:#fff}
   html.fx-focus .tcard:has(.tfb.ok:not(:empty)) .askb,html.fx-focus .tcard:has(.tfb.err:not(:empty)) .askb{color:#0E0A1A;border-color:rgba(14,10,26,.35)}
 }
+/* łuki: zawijanie zamiast przewijania i ucinania */
+.k-arcs{flex-wrap:wrap;overflow:visible}
+.k-arcs button{max-width:100%;white-space:normal;text-align:left;line-height:1.25;padding:8px 14px;min-height:40px}
