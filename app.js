@@ -3042,14 +3042,22 @@ function wCrest(f, big) { return '<span class="w-crest' + (big ? ' big' : '') + 
 /* ---- ритуал входу ---- */
 function wRitual(c, onDone) {
   var W = worldOf(c), R = W.ritual, qs = R.questions, i = 0, tally = {};
-  var box = mbox('<div class="w-rit"><div class="w-rit-i">' + esc(R.icon) + '</div><div class="eyebrow">' + tx({uk:'Ритуал входу', pl:'Rytuał wejścia', en:'Entry ritual'}) + '</div><h3>' + esc(wl(R.title)) + '</h3><p class="muted">' + esc(wl(R.intro)) + '</p><div id="wrBody"></div></div>');
+  /* питання й відповіді — мовою, яку учень вивчає (TARGET), а не завжди англійською */
+  var TG = TARGET || 'en', IN = {pl:{uk:'польською', pl:'po polsku', en:'in Polish'}, uk:{uk:'українською', pl:'po ukraińsku', en:'in Ukrainian'}, en:{uk:'англійською', pl:'po angielsku', en:'in English'}};
+  var intro = wl(R.intro); if (TG !== 'en') intro = intro.replace(/англійською|po angielsku|in English/g, tx(IN[TG]));
+  var TRA = {}; function trA(txt, ctx) { if (TG === 'en') return Promise.resolve(txt); if (TRA[txt]) return TRA[txt]; return (TRA[txt] = wtApi(txt, ctx, 'en', TG).then(function (r) { return r || txt; })); }
+  qs.forEach(function (qq) { qq.a.forEach(function (a) { trA(a[0], qq.q); }); }); /* передзавантаження */
+  var box = mbox('<div class="w-rit"><div class="w-rit-i">' + esc(R.icon) + '</div><div class="eyebrow">' + tx({uk:'Ритуал входу', pl:'Rytuał wejścia', en:'Entry ritual'}) + '</div><h3>' + esc(wl(R.title)) + '</h3><p class="muted">' + esc(intro) + '</p><div id="wrBody"></div></div>');
   var body = box.querySelector('#wrBody');
   function step() {
     if (i >= qs.length) return reveal();
-    var qq = qs[i];
+    var qq = qs[i], cur = i, qT = TG === 'en' ? qq.q : ((qq.hint && qq.hint[TG]) || qq.q);
+    var hintT = TG === 'en' ? (LANG !== 'en' ? wl(qq.hint) : '') : (LANG !== TG ? ((qq.hint && qq.hint[LANG]) || qq.q) : '');
+    var order = shuffle(qq.a.map(function (a, k) { return k; }));
     body.innerHTML = '<div class="w-rit-prog">' + qs.map(function (_, k) { return '<i class="' + (k < i ? 'on' : k === i ? 'cur' : '') + '"></i>'; }).join('') + '</div>' +
-      '<p class="w-rit-q">' + esc(qq.q) + '</p>' + (LANG !== 'en' && wl(qq.hint) ? '<details class="w-rit-h"><summary>' + tx({uk:'Переклад', pl:'Tłumaczenie', en:'Translation'}) + '</summary>' + esc(wl(qq.hint)) + '</details>' : '') +
-      '<div class="w-rit-a">' + shuffle(qq.a.map(function (a, k) { return k; })).map(function (k) { return '<button type="button" class="topt" data-k="' + k + '">' + esc(qq.a[k][0]) + '</button>'; }).join('') + '</div>';
+      '<p class="w-rit-q">' + esc(qT) + '</p>' + (hintT ? '<details class="w-rit-h"><summary>' + tx({uk:'Переклад', pl:'Tłumaczenie', en:'Translation'}) + '</summary>' + esc(hintT) + '</details>' : '') +
+      '<div class="w-rit-a">' + order.map(function (k) { return '<button type="button" class="topt" data-k="' + k + '"' + (TG !== 'en' ? ' style="opacity:.55"' : '') + '>' + esc(qq.a[k][0]) + '</button>'; }).join('') + '</div>';
+    if (TG !== 'en') body.querySelectorAll('[data-k]').forEach(function (b) { trA(qq.a[+b.dataset.k][0], qq.q).then(function (tt) { if (cur === i) { b.textContent = tt; b.style.opacity = ''; } }); });
     body.querySelectorAll('[data-k]').forEach(function (b) { b.onclick = function () { var f = qq.a[+b.dataset.k][1]; tally[f] = (tally[f] || 0) + 1; b.classList.add('right'); setTimeout(function () { i++; step(); }, 260); }; });
   }
   function reveal() {
