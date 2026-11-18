@@ -9,3 +9,5 @@
 - Zootopia (A1–A2): pliki z01..z36.py, bash zrun.sh zNN.py (img=train, 30 słów). Rola: młody kadet/partner Judy. Gotowe 1-36 (KOMPLET).
 - Potem: STRESS TEST wszystkich kursów (prośba usera, raport na 6:00).
 - UWAGA Zootopia: luki UA muszą testować formy ukraińskie (rodzaj/przypadek/czas), nie „—” dla być.
+- Dune Part One (B1–B2): dune-1/d01..d36.py. KOMPLET, opublikowane.
+- The Mentalist S1 (B2–C1): mentalist-1/m01..m36.py, ./mrun.sh N (img=letter, 100 słów, bossy 120, egzamin 150). Rola: stażysta w zespole Lisbon (CBI). KOMPLET 1-36 + journal-mentalist.js, plakat, world.js, migration-mentalist.sql. Czeka na merge i ładowanie do bazy (decyzja właściciela).

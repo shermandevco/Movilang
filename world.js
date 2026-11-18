@@ -283,6 +283,43 @@ window.MOVILANG_WORLDS = {
     }
   },
 
+  'mentalist-1': {
+    theme: null,
+    points: {icon: '☕', uk: 'чашки чаю', pl: 'filiżanki herbaty', en: 'cups of tea'},
+    ritual: {
+      icon: '🛋',
+      title: {uk: 'Твоє місце в CBI', pl: 'Twoje miejsce w CBI', en: 'Your place at the CBI'},
+      intro: {uk: 'Офіс CBI, ранок, запах кави і чаю. П\'ять питань англійською — і Лісабон вирішить, у чию команду тебе поставити.', pl: 'Biuro CBI, ranek, zapach kawy i herbaty. Pięć pytań po angielsku — i Lisbon zdecyduje, do czyjego zespołu cię przydzielić.', en: 'The CBI office, morning, the smell of coffee and tea. Five questions, and Lisbon decides where you belong.'},
+      reveal: {uk: 'Лісабон закриває твою папку. Твоє місце:', pl: 'Lisbon zamyka twoją teczkę. Twoje miejsce:', en: 'Lisbon closes your file. Your place:'},
+      questions: [
+        {q: 'How do you solve a problem?', hint: {uk: 'Як ти розв\'язуєш проблему?', pl: 'Jak rozwiązujesz problem?', en: ''},
+          a: [['I follow the rules, step by step.', 'team'], ['I watch people and wait for a mistake.', 'jane'], ['I look for evidence and test it.', 'lab'], ['I ask questions and tell the story.', 'media']]},
+        {q: 'What do you drink at work?', hint: {uk: 'Що ти п\'єш на роботі?', pl: 'Co pijesz w pracy?', en: ''},
+          a: [['Strong black coffee.', 'team'], ['Tea, in my own cup.', 'jane'], ['Water. Coffee affects my hands.', 'lab'], ['Whatever is free.', 'media']]},
+        {q: 'A suspect is lying. You…', hint: {uk: 'Підозрюваний бреше. Ти…', pl: 'Podejrzany kłamie. Ty…', en: ''},
+          a: [['…check his alibi.', 'team'], ['…tell him what he had for breakfast.', 'jane'], ['…look at his shoes.', 'lab'], ['…write it down for tomorrow\'s front page.', 'media']]},
+        {q: 'Choose one thing.', hint: {uk: 'Обери одну річ.', pl: 'Wybierz jedną rzecz.', en: ''},
+          a: [['A badge.', 'team'], ['A couch.', 'jane'], ['A microscope.', 'lab'], ['A microphone.', 'media']]},
+        {q: 'Finish the sentence: “The truth is…”', hint: {uk: 'Закінчи речення: «Правда — це…»', pl: 'Dokończ zdanie: „Prawda to…”', en: ''},
+          a: [['…what you can prove in court.', 'team'], ['…written on people\'s faces.', 'jane'], ['…in the details.', 'lab'], ['…a good headline.', 'media']]}
+      ]
+    },
+    factions: {
+      team: {icon: '⭐', color: '#2b3f5c', uk: 'Команда Лісабон', pl: 'Zespół Lisbon', en: 'Lisbon\'s team', motto: {uk: 'Правила існують не просто так', pl: 'Zasady istnieją nie bez powodu', en: 'Rules are there for a reason'}},
+      jane: {icon: '☕', color: '#9e2a2b', uk: 'Метод Джейна', pl: 'Metoda Jane\'a', en: 'Jane\'s method', motto: {uk: 'Люди завжди себе видають', pl: 'Ludzie zawsze się zdradzają', en: 'People always give themselves away'}},
+      lab: {icon: '🔬', color: '#2f6b5a', uk: 'Лабораторія', pl: 'Laboratorium', en: 'The lab', motto: {uk: 'Докази не брешуть', pl: 'Dowody nie kłamią', en: 'Evidence doesn\'t lie'}},
+      media: {icon: '🎙', color: '#6b4a2b', uk: 'Преса', pl: 'Prasa', en: 'The press', motto: {uk: 'Кожна справа — історія', pl: 'Każda sprawa to historia', en: 'Every case is a story'}}
+    },
+    standings: {uk: 'Дошка CBI', pl: 'Tablica CBI', en: 'The CBI board'},
+    collection: {uk: 'Закриті справи', pl: 'Zamknięte sprawy', en: 'Closed cases'}, cardIcon: '📁',
+    artifacts: {uk: 'Речові докази', pl: 'Dowody rzeczowe', en: 'Evidence locker'},
+    journal: {
+      title: {uk: 'Нотатник стажиста', pl: 'Notes stażysty', en: 'The trainee\'s notebook'}, icon: '📓',
+      open: 'From the notebook:', sign: '— the CBI trainee',
+      lines: ['Today: {scene_en}. Word for the report: “{w1}”.', 'New words for the file: {w1}, {w2}, {w3}.']
+    }
+  },
+
   'game-of-thrones-1': {
     theme: null,
     points: {icon: '🪶', uk: 'сторінки хроніки', pl: 'strony kroniki', en: 'chronicle pages'},

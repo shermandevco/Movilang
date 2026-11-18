@@ -65,7 +65,7 @@ function ttName(k) { return (TT_L[LANG] && TT_L[LANG][k]) || TASK_TYPES[k] || k;
 var TASK_TYPES = { reading:'READING', intro:'START', match:'MATCH', order:'WORD ORDER', type:'TYPE IT', tf:'TRUE / FALSE', vocabulary:'VOCABULARY', listening:'LISTENING', subtitles:'SUBTITLES', grammar:'GRAMMAR', speaking:'SPEAKING', quiz:'MINI QUIZ', final:'FINAL', cards:'CHARACTERS', glossary:'SCENE GLOSSARY', quest:'QUEST', drill:'DRILL' };
 function isInfo(k) { return k === 'intro' || k === 'cards' || k === 'glossary'; }
 var POSTER_CLASSES = ['p1','p2','p3','p4','p5','p6','p7','p8'];
-var POSTER_ART = ['cars','game-of-thrones-1','dune-1','harry-potter-1','vampire-diaries-1','home-alone','zootopia','friends-s1','himym-s1'];
+var POSTER_ART = ['cars','game-of-thrones-1','dune-1','mentalist-1','harry-potter-1','vampire-diaries-1','home-alone','zootopia','friends-s1','himym-s1'];
 
 
 /* ================= i18n + theme ================= */
@@ -3126,7 +3126,7 @@ function wBindCards(root) {
 }
 
 /* dzienniki kursów (300 KB) ładują się po starcie strony, a nie razem z nią */
-var JOURNAL_FILES = ['hp:2', 'tvd:2', 'himym:2', 'friends:2', 'homealone:2', 'zootopia:2', 'cars:2', 'got:1', 'dune:1'], JOURNALS_P = null;
+var JOURNAL_FILES = ['hp:2', 'tvd:2', 'himym:2', 'friends:2', 'homealone:2', 'zootopia:2', 'cars:2', 'got:1', 'dune:1', 'mentalist:1'], JOURNALS_P = null;
 function loadJournals() {
   if (!JOURNALS_P) JOURNALS_P = Promise.all(JOURNAL_FILES.map(function (f) { return new Promise(function (res) { var s = document.createElement('script'), a = f.split(':'); s.src = 'content/journal-' + a[0] + '.js?v=' + a[1]; s.async = true; s.onload = s.onerror = function () { res(); }; document.head.appendChild(s); }); }));
   return JOURNALS_P;
