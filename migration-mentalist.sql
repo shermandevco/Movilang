@@ -8,7 +8,7 @@ create extension if not exists http with schema extensions;
 
 do $$
 declare
-  src text := 'https://raw.githubusercontent.com/Movilang/movilang/main/content/mentalist/mentalist1.json';
+  src text := 'https://raw.githubusercontent.com/shermandevco/Movilang/main/content/mentalist/mentalist1.json';
   j jsonb; cid uuid; l jsonb;
 begin
   select content::jsonb into j from extensions.http_get(src);
