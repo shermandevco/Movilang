@@ -1277,3 +1277,11 @@ details.cfold[open]>summary::after{transform:rotate(-90deg)}
 .tt-head h3{margin:0}
 .tt-panel.tt-off .task-types{display:none}
 .tt-panel.tt-off .tt-head{margin-bottom:0}
+/* nawigacja: bez zawijania (PL ma dłuższe napisy) */
+.navlinks{flex-wrap:nowrap;min-width:0}
+.navlinks a,#navuser .btn,#navuser a,#navuser button{white-space:nowrap}
+#navuser{flex-wrap:nowrap!important}
+@media (max-width:1380px){.navlinks{gap:16px}.navlinks a[href="#/guide"]{display:none}}
+@media (max-width:1200px){.navlinks a[href="#/test"]{display:none}}
+@media (max-width:1060px){.navlinks a[href="#/trial"]{display:none}}
+#navuser>.row{flex-wrap:nowrap}
