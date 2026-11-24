@@ -3609,7 +3609,7 @@ function route() {
   }
   if (nav) { var fxFirst = $app.firstElementChild, fxDoneP = false; Promise.resolve(p).then(function () { fxDoneP = true; }, function () { fxDoneP = true; });
     setTimeout(function () { if (!fxDoneP && $app.firstElementChild === fxFirst) { $app.innerHTML = '<div class="page fx-skel" aria-busy="true"><i class="sk-h"></i><i></i><i class="sk-s"></i><div class="sk-grid"><i></i><i></i><i></i></div></div>'; $app.classList.remove('pg-leave'); } }, 160); }
-  Promise.resolve(p).catch(function (e) { $app.innerHTML = t('<div class="page"><div class="empty">Помилка: ') + esc(e.message) + '</div></div>'; })
+  Promise.resolve(p).catch(function (e) { var m = String(e && e.message || e); if (/restricted|exceed_|quota|Failed to fetch|NetworkError/i.test(m)) { $app.innerHTML = '<div class="page"><div class="empty" style="display:grid;gap:10px;justify-items:center;text-align:center"><b style="font-size:22px">' + tx({uk:'Технічна перерва', pl:'Przerwa techniczna', en:'Scheduled maintenance'}) + '</b><span>' + tx({uk:'Ми оновлюємо сервер. Курси й прогрес у безпеці — спробуй за кілька хвилин.', pl:'Aktualizujemy serwer. Kursy i postępy są bezpieczne — spróbuj za kilka minut.', en:'We are updating the server. Courses and progress are safe — try again in a few minutes.'}) + '</span><button class="btn btn-red" type="button" onclick="location.reload()">' + tx({uk:'Спробувати знову', pl:'Spróbuj ponownie', en:'Try again'}) + '</button></div></div>'; return; } $app.innerHTML = t('<div class="page"><div class="empty">Помилка: ') + esc(m) + '</div></div>'; })
     .then(function () { if (!nav) return; $app.classList.remove('pg-leave'); void $app.offsetWidth; $app.classList.add('pg-in'); });
 }
 var ROUTE_LAST = null;
