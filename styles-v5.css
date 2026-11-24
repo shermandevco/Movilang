@@ -440,3 +440,13 @@ html[data-v5] .x-dash{background:radial-gradient(closest-side at 78% 0%,color-mi
 html[data-v5] .x-t-goal b{font-size:18px!important;line-height:1.2}
 html[data-v5] .x-t-goal #xGoal .x-ring-t{font-size:18px!important}
 html[data-v5] .x-t-goal>div>b,html[data-v5] .x-t-goal>div>span{display:block}
+/* telefon: każdy krok lekcji z własnym ekranem, bez przełączania przy przewijaniu */
+html[data-v5] .x-step-scr{display:none}
+@media (max-width:900px){
+  html[data-v5] .x-story .x-phone{display:none}
+  html[data-v5] .x-step{padding:22px;border-radius:var(--x-r);background:var(--x-card);border:1px solid var(--x-line)}
+  html[data-v5] .x-step h2{font-size:26px}
+  html[data-v5] .x-step-scr{display:block;position:relative;margin-top:18px;min-height:250px;border-radius:18px;background:var(--x-bg2);border:1px solid var(--x-line);overflow:hidden}
+  html[data-v5] .x-step-scr .x-scr{position:absolute;inset:0;padding:18px;opacity:1;transform:none}
+}
+@media (max-width:900px){html[data-v5] .x-step-scr{min-height:300px}html[data-v5] .x-step-scr .x-orb{width:76px;height:76px}}

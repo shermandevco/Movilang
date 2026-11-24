@@ -4313,7 +4313,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEv
       scrollFns.push(function (y, vh) {
         var r = sec.getBoundingClientRect(), total = sec.offsetHeight - vh, p = total > 0 ? Math.max(0, Math.min(1, -r.top / total)) : 0;
         sec.style.setProperty('--p', p.toFixed(4));
-        if (kind === 'story') { var n = sec.querySelectorAll('.x-step').length, i = Math.min(n - 1, Math.floor(p * n * 0.999)); if (sec._i !== i) { sec._i = i; sec.querySelectorAll('.x-step').forEach(function (s, k) { s.classList.toggle('on', k === i); }); sec.querySelectorAll('.x-scr').forEach(function (s, k) { s.classList.toggle('on', k === i); }); } }
+        if (kind === 'story' && innerWidth > 900) { var n = sec.querySelectorAll('.x-step').length, i = Math.min(n - 1, Math.floor(p * n * 0.999)); if (sec._i !== i) { sec._i = i; sec.querySelectorAll('.x-step').forEach(function (s, k) { s.classList.toggle('on', k === i); }); sec.querySelectorAll('.x-scr').forEach(function (s, k) { s.classList.toggle('on', k === i); }); } }
         if (kind === 'rail') { var tr = sec.querySelector('.x-track'); if (tr && innerWidth > 900) { var max = tr.scrollWidth - sec.querySelector('.x-pinbox').clientWidth + 48; sec.style.height = max > 40 ? Math.round(vh + max * 1.6) + 'px' : 'auto'; if (max <= 40) { sec.classList.add('x-nopin'); return; } tr.style.transform = 'translate3d(' + (-max * p).toFixed(1) + 'px,0,0)'; } else if (tr) tr.style.transform = ''; }
       });
     });
@@ -4383,7 +4383,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEv
         '<section class="x-sec x-stats">' + [[courses.length, L('курсів', 'kursów', 'courses')], [lessons, L('уроків', 'lekcji', 'lessons')], [3, L('мови навчання', 'języki nauki', 'languages')], [10, L('хвилин на день', 'minut dziennie', 'minutes a day')]].map(function (s, i) { return '<div class="x-stat" data-r style="--d:' + i * 80 + 'ms"><b data-count="' + s[0] + '">0</b><span>' + s[1] + '</span></div>'; }).join('') + '</section>' +
         /* STORY (przypięta) */
         '<section class="x-story" data-pin="story"><div class="x-pinbox"><div class="x-story-t"><span class="x-k">' + L('Як проходить урок', 'Jak wygląda lekcja', 'How a lesson works') + '</span>' +
-          steps.map(function (s, i) { return '<div class="x-step' + (i ? '' : ' on') + '"><span class="x-step-n">0' + (i + 1) + ' · ' + s.k + '</span><h2>' + s.t + '</h2><p>' + s.d + '</p></div>'; }).join('') +
+          steps.map(function (s, i) { return '<div class="x-step' + (i ? '' : ' on') + '"><span class="x-step-n">0' + (i + 1) + ' · ' + s.k + '</span><h2>' + s.t + '</h2><p>' + s.d + '</p><div class="x-step-scr" aria-hidden="true"><div class="x-scr on">' + screens[i] + '</div></div></div>'; }).join('') +
           '<div class="x-story-bar"><i></i></div></div><div class="x-phone"><div class="x-notch"></div>' + screens.map(function (s, i) { return '<div class="x-scr' + (i ? '' : ' on') + '">' + s + '</div>'; }).join('') + '</div></div></section>' +
         /* RAIL (poziome przewijanie) */
         '<section class="x-rail" data-pin="rail"><div class="x-pinbox"><div class="x-head"><div><span class="x-k">' + L('Каталог', 'Katalog', 'Catalogue') + '</span><h2 class="x-h2">' + L('Обери свою історію', 'Wybierz swoją historię', 'Pick your story') + '</h2></div><a class="x-link" href="#/catalog">' + L('Усі курси', 'Wszystkie kursy', 'All courses') + IC.arrow + '</a></div>' +
