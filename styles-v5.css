@@ -450,3 +450,16 @@ html[data-v5] .x-step-scr{display:none}
   html[data-v5] .x-step-scr .x-scr{position:absolute;inset:0;padding:18px;opacity:1;transform:none}
 }
 @media (max-width:900px){html[data-v5] .x-step-scr{min-height:300px}html[data-v5] .x-step-scr .x-orb{width:76px;height:76px}}
+html[data-v5] .x-btn-buy{background:var(--x-fg);color:var(--x-bg)!important}
+html[data-v5] .x-btn-buy:hover{box-shadow:0 14px 40px -16px var(--x-fg)}
+html[data-v5] .x-cta-note{margin:14px 0 0;font-size:14px;color:var(--x-mu)}
+@media (max-width:900px){
+  html[data-v5] .x-step-scr{min-height:0!important}
+  html[data-v5] .x-step-scr .x-scr{position:static;inset:auto}
+  html[data-v5] .x-step-scr .x-scr-cards{position:static;height:auto;display:grid;gap:10px;place-items:stretch}
+  html[data-v5] .x-step-scr .x-fc{position:static;width:auto;transform:none!important;padding:14px 18px;box-shadow:none}
+  html[data-v5] .x-step-scr .x-fc b{font-size:20px}
+  html[data-v5] .x-step-scr .x-due{position:static;margin-top:4px}
+  html[data-v5] .x-step-scr .x-scr-mic{padding:8px 0}
+}
+@media (max-width:640px){html[data-v5] .x-hero-in{padding-bottom:24px}}
