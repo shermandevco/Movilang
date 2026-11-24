@@ -4261,115 +4261,266 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEv
 
 
 /* =========================================================================
-   DEMO v4 (gałąź demo-nowy): nowoczesny wygląd, mobile-first.
-   Warstwa nad szablonem 3: html[data-v4]. Wyłączenie: localStorage ml_v4 = "0".
-   Sekcja „Bento” wzorowana na komponencie 21st.dev „Bento Mini UI” (sajad).
+   DEMO v5 «Kinowa noc» (gałąź demo-nowy) — nowy interfejs od zera.
+   Widoki: strona główna (gość), pulpit po zalogowaniu, katalog, strona kursu,
+   nagłówek kabinetu. Animacje sterowane przewijaniem (sticky + progres).
+   Lekcje, admin i płatności korzystają z istniejącej logiki.
+   Wyłączenie: localStorage ml_v5 = "0" (albo przełącznik w stopce).
    ========================================================================= */
 (function () {
-  var ON = String(lsGet('ml_v4', '1')) !== '0';
-  if (!ON) return;
-  document.documentElement.setAttribute('data-v4', '1');
+  if (String(lsGet('ml_v5', '1')) === '0') { setTimeout(function () { var f = document.querySelector('footer'); if (!f) return; var a = document.createElement('a'); a.href = '#'; a.className = 'x-sw'; a.textContent = tx({uk:'Новий вигляд (демо)', pl:'Nowy wygląd (demo)', en:'New look (demo)'}); a.onclick = function (e) { e.preventDefault(); lsSet('ml_v5', '1'); location.reload(); }; f.appendChild(a); }, 1500); return; }
+  var R = document.documentElement; R.setAttribute('data-v5', '1');
   var L = function (u, p, e) { return tx({uk:u, pl:p, en:e}); };
+  var RM = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   var LVS = ['A1', 'A2', 'B1', 'B2', 'C1'];
-  function src(c) { if (c.poster_url && /^https:\/\//.test(c.poster_url)) return c.poster_url; return POSTER_ART.indexOf(c.slug) > -1 ? 'assets/posters/' + c.slug + '.svg?v=1' : ''; }
-  function poster(c, cls) { var s = src(c); return '<div class="v4-pst ' + (cls || '') + '">' + (s ? '<img src="' + esc(s) + '" alt="" loading="lazy" decoding="async">' : '<span>' + esc(tr(c, 'title')) + '</span>') + '</div>'; }
-  var I = function (d) { return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; };
-  var IC = {play:I('<path d="M7 5v14l11-7z"/>'), check:I('<path d="M5 12l5 5 9-10"/>'), mic:I('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'), arrow:I('<path d="M5 12h14M13 6l6 6-6 6"/>'), tap:I('<path d="M9 11V5a2 2 0 1 1 4 0v6"/><path d="M13 10a2 2 0 1 1 4 0v3a6 6 0 0 1-6 6h-.5a5 5 0 0 1-4-2l-2.5-3.5a1.7 1.7 0 0 1 2.7-2L9 13"/>')};
 
-  function cardHtml(c) {
-    var lv = courseLevels(c);
-    return '<a class="v4-card" href="#/course/' + esc(c.id) + '" data-lv="' + lv.join(' ') + '">' + poster(c) +
-      '<div class="v4-card-b"><b>' + esc(tr(c, 'title')) + '</b><span class="v4-card-m"><i>' + esc(c.level || '') + '</i>' + (c.lessons_count || 0) + ' ' + L('уроків', 'lekcji', 'lessons') + '</span><span class="v4-card-p">' + esc(priceTxt(c)) + '</span></div></a>';
+  /* ---------- pomocnicze ---------- */
+  function src(c) { if (!c) return ''; if (c.poster_url && /^https:\/\//.test(c.poster_url)) return c.poster_url; return POSTER_ART.indexOf(c.slug) > -1 ? 'assets/posters/' + c.slug + '.svg?v=1' : ''; }
+  function pst(c, cls) { var s = src(c); return '<div class="x-pst ' + (cls || '') + '">' + (s ? '<img src="' + esc(s) + '" alt="" loading="lazy" decoding="async">' : '<span>' + esc(tr(c, 'title')) + '</span>') + '</div>'; }
+  var SV = function (d, w) { return '<svg viewBox="0 0 24 24" width="' + (w || 20) + '" height="' + (w || 20) + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; };
+  var IC = {
+    play:SV('<path d="M7 5v14l11-7z" fill="currentColor"/>'), arrow:SV('<path d="M5 12h14M13 6l6 6-6 6"/>'), check:SV('<path d="M5 12l5 5 9-10"/>'),
+    lock:SV('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'), mic:SV('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'),
+    fire:SV('<path d="M12 22c4 0 7-3 7-7 0-3-2-5-3-7-1 2-2 3-4 3 1-3 0-6-3-9 0 4-4 6-4 11 0 5 3 9 7 9z"/>'), book:SV('<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/>'),
+    chat:SV('<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>'), brain:SV('<path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V5a2 2 0 0 0-3-1z"/><path d="M15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 1"/>'),
+    target:SV('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>'), star:SV('<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>'),
+    search:SV('<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>'), film:SV('<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 3v18M17 3v18M3 8h4M3 16h4M17 8h4M17 16h4"/>'),
+    gear:SV('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>')
+  };
+  function ring(pct, size, stroke, label) { var r = (size - stroke) / 2, C = 2 * Math.PI * r, off = C * (1 - Math.max(0, Math.min(1, pct))); return '<svg class="x-ring" width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '" role="img" aria-label="' + esc(label || Math.round(pct * 100) + '%') + '"><circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" fill="none" stroke="var(--x-line)" stroke-width="' + stroke + '"/><circle class="x-ring-v" cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" fill="none" stroke="url(#xg)" stroke-width="' + stroke + '" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + C + '" data-off="' + off + '" transform="rotate(-90 ' + size / 2 + ' ' + size / 2 + ')"/><defs><linearGradient id="xg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--x-ac)"/><stop offset="1" stop-color="var(--x-ac2)"/></linearGradient></defs></svg>'; }
+  function split(text) { return text.split(' ').map(function (w, i) { return '<span class="x-w"><span style="--i:' + i + '">' + esc(w) + '</span></span>'; }).join(' '); }
+  function first(name) { return String(name || '').split(/[\s@]/)[0]; }
+  function greet() { var h = new Date().getHours(); return h < 5 ? L('Доброї ночі', 'Dobranoc', 'Good night') : h < 12 ? L('Доброго ранку', 'Dzień dobry', 'Good morning') : h < 18 ? L('Добрий день', 'Dzień dobry', 'Good afternoon') : L('Добрий вечір', 'Dobry wieczór', 'Good evening'); }
+  function arcOf(l) { var v = l && l.variants; return v ? (v['arc_' + LANG] || v.arc || '') : ''; }
+
+  /* ---------- silnik animacji: pojawianie, parallax, liczniki, sekcje przypięte ---------- */
+  var IO = null, scrollFns = [], ticking = false;
+  function onScroll() { if (ticking) return; ticking = true; requestAnimationFrame(function () { ticking = false; var y = window.scrollY, vh = innerHeight; scrollFns.forEach(function (f) { try { f(y, vh); } catch (e) {} }); }); }
+  window.addEventListener('scroll', onScroll, {passive:true}); window.addEventListener('resize', onScroll);
+  function count(el) { var to = parseFloat(el.dataset.count) || 0, t0 = null, d = 1100; if (RM) { el.textContent = to; return; } function st(ts) { if (!t0) t0 = ts; var k = Math.min(1, (ts - t0) / d), e = 1 - Math.pow(1 - k, 3); el.textContent = Math.round(to * e); if (k < 1) requestAnimationFrame(st); } requestAnimationFrame(st); }
+  function life(root) {
+    scrollFns = [];
+    if (IO) IO.disconnect();
+    var els = root.querySelectorAll('[data-r]');
+    if (RM || !('IntersectionObserver' in window)) { els.forEach(function (e) { e.classList.add('in'); }); }
+    else { IO = new IntersectionObserver(function (es) { es.forEach(function (e) { if (!e.isIntersecting) return; var t = e.target; t.classList.add('in'); IO.unobserve(t); t.querySelectorAll('[data-count]').forEach(count); if (t.dataset.count) count(t); t.querySelectorAll('.x-ring-v').forEach(function (c) { c.style.strokeDashoffset = c.dataset.off; }); }); }, {threshold:0.18, rootMargin:'0px 0px -6% 0px'}); els.forEach(function (e) { IO.observe(e); }); }
+    if (RM) { root.querySelectorAll('.x-ring-v').forEach(function (c) { c.style.strokeDashoffset = c.dataset.off; }); root.querySelectorAll('[data-count]').forEach(count); }
+    var par = root.querySelectorAll('[data-par]');
+    if (par.length && !RM) scrollFns.push(function (y) { par.forEach(function (e) { var r = e.getBoundingClientRect(), mid = r.top + r.height / 2 - innerHeight / 2; e.style.transform = 'translate3d(0,' + (mid * -parseFloat(e.dataset.par)).toFixed(1) + 'px,0)'; }); });
+    root.querySelectorAll('[data-pin]').forEach(function (sec) {
+      var kind = sec.dataset.pin;
+      scrollFns.push(function (y, vh) {
+        var r = sec.getBoundingClientRect(), total = sec.offsetHeight - vh, p = total > 0 ? Math.max(0, Math.min(1, -r.top / total)) : 0;
+        sec.style.setProperty('--p', p.toFixed(4));
+        if (kind === 'story') { var n = sec.querySelectorAll('.x-step').length, i = Math.min(n - 1, Math.floor(p * n * 0.999)); if (sec._i !== i) { sec._i = i; sec.querySelectorAll('.x-step').forEach(function (s, k) { s.classList.toggle('on', k === i); }); sec.querySelectorAll('.x-scr').forEach(function (s, k) { s.classList.toggle('on', k === i); }); } }
+        if (kind === 'rail') { var tr = sec.querySelector('.x-track'); if (tr && innerWidth > 900) { var max = tr.scrollWidth - sec.querySelector('.x-pinbox').clientWidth + 48; sec.style.height = max > 40 ? Math.round(vh + max * 1.6) + 'px' : 'auto'; if (max <= 40) { sec.classList.add('x-nopin'); return; } tr.style.transform = 'translate3d(' + (-max * p).toFixed(1) + 'px,0,0)'; } else if (tr) tr.style.transform = ''; }
+      });
+    });
+    var bar = document.getElementById('xProg'); if (!bar) { bar = document.createElement('div'); bar.id = 'xProg'; document.body.appendChild(bar); }
+    scrollFns.push(function (y) { var h = document.documentElement.scrollHeight - innerHeight; bar.style.transform = 'scaleX(' + (h > 0 ? y / h : 0).toFixed(4) + ')'; });
+    root.querySelectorAll('[data-tilt]').forEach(function (c) { if (RM || matchMedia('(hover: none)').matches) return; c.addEventListener('pointermove', function (e) { var r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, yy = (e.clientY - r.top) / r.height - 0.5; c.style.transform = 'perspective(800px) rotateY(' + (x * 10).toFixed(2) + 'deg) rotateX(' + (-yy * 10).toFixed(2) + 'deg) translateY(-4px)'; c.style.setProperty('--mx', (x + 0.5) * 100 + '%'); c.style.setProperty('--my', (yy + 0.5) * 100 + '%'); }); c.addEventListener('pointerleave', function () { c.style.transform = ''; }); });
+    onScroll();
   }
-  function bindLevels(root) {
-    var chips = root.querySelectorAll('[data-v4lv]'), cards = root.querySelectorAll('.v4-card');
-    function apply(v) { chips.forEach(function (b) { var on = b.dataset.v4lv === v; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); }); var n = 0; cards.forEach(function (c) { var ok = v === 'all' || (' ' + c.dataset.lv + ' ').indexOf(' ' + v + ' ') > -1; c.hidden = !ok; if (ok) n++; }); var e = root.querySelector('.v4-none'); if (e) e.hidden = n > 0; lsSet('ml_v2_lvl', v); }
-    chips.forEach(function (b) { b.onclick = function () { apply(b.dataset.v4lv); }; });
-    var cur = lsGet('ml_v2_lvl', 'all'); apply(root.querySelector('[data-v4lv="' + cur + '"]') ? cur : 'all');
+  function card(c, extra) {
+    var lv = courseLevels(c), own = OWNED && OWNED[c.id];
+    return '<a class="x-card" data-tilt data-r href="#/course/' + esc(c.id) + '" data-lv="' + lv.join(' ') + '" data-kind="' + esc(c.kind || '') + '" data-q="' + esc((tr(c, 'title') + ' ' + (c.title || '') + ' ' + (c.title_pl || '')).toLowerCase()) + '">' + pst(c) +
+      '<span class="x-card-g" aria-hidden="true"></span><div class="x-card-b"><span class="x-chip">' + esc(c.level || '') + '</span><b>' + esc(tr(c, 'title')) + '</b><span class="x-card-m">' + (c.kind === 'series' ? L('Серіал', 'Serial', 'Series') : L('Фільм', 'Film', 'Film')) + ' · ' + (c.lessons_count || 0) + ' ' + L('уроків', 'lekcji', 'lessons') + '</span>' +
+      (extra || '<span class="x-card-p' + (own ? ' own' : '') + '">' + esc(priceTxt(c)) + '</span>') + '</div></a>';
   }
-  function levelChips(courses) {
+  function bindFilter(root) {
+    var st = {lv:lsGet('ml_v2_lvl', 'all'), kind:'all', q:''};
+    function apply() {
+      var n = 0;
+      root.querySelectorAll('.x-card[data-lv]').forEach(function (c) { var ok = (st.lv === 'all' || (' ' + c.dataset.lv + ' ').indexOf(' ' + st.lv + ' ') > -1) && (st.kind === 'all' || c.dataset.kind === st.kind) && (!st.q || c.dataset.q.indexOf(st.q) > -1); c.hidden = !ok; if (ok) { n++; c.classList.add('in'); } });
+      root.querySelectorAll('[data-f]').forEach(function (b) { var on = st[b.dataset.f] === b.dataset.v; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+      var e = root.querySelector('.x-none'); if (e) e.hidden = n > 0;
+    }
+    root.querySelectorAll('[data-f]').forEach(function (b) { b.onclick = function () { st[b.dataset.f] = b.dataset.v; if (b.dataset.f === 'lv') lsSet('ml_v2_lvl', b.dataset.v); apply(); }; });
+    var q = root.querySelector('.x-q'); if (q) q.oninput = function () { st.q = q.value.trim().toLowerCase(); apply(); };
+    if (!root.querySelector('[data-f="lv"][data-v="' + st.lv + '"]')) st.lv = 'all';
+    apply();
+  }
+  function chips(courses, withKind) {
     var have = {}; courses.forEach(function (c) { courseLevels(c).forEach(function (l) { have[l] = 1; }); });
-    return '<div class="v4-chips" role="group" aria-label="' + esc(L('Рівень', 'Poziom', 'Level')) + '"><button type="button" data-v4lv="all">' + L('Усі', 'Wszystkie', 'All') + '</button>' + LVS.filter(function (l) { return have[l]; }).map(function (l) { return '<button type="button" data-v4lv="' + l + '">' + l + '</button>'; }).join('') + '</div>';
+    var b = function (f, v, t) { return '<button type="button" data-f="' + f + '" data-v="' + v + '">' + t + '</button>'; };
+    return '<div class="x-chips" role="group" aria-label="' + esc(L('Рівень', 'Poziom', 'Level')) + '">' + b('lv', 'all', L('Усі рівні', 'Wszystkie poziomy', 'All levels')) + LVS.filter(function (l) { return have[l]; }).map(function (l) { return b('lv', l, l); }).join('') + '</div>' +
+      (withKind ? '<div class="x-chips">' + b('kind', 'all', L('Усе', 'Wszystko', 'All')) + b('kind', 'film', L('Фільми', 'Filmy', 'Films')) + b('kind', 'series', L('Серіали', 'Seriale', 'Series')) + '</div>' : '');
   }
 
-  /* ---------- strona główna ---------- */
-  function viewHomeV4() {
+  /* =================== STRONA GŁÓWNA (gość) =================== */
+  function viewHomeX() {
     return API.listCourses(false).then(function (courses) {
       var bundle = (SETTINGS && SETTINGS.bundle_price) || '149 zł';
       var one = (courses.filter(function (c) { return !isFreeCourse(c); })[0] || {}).price || '49 zł';
       var lessons = courses.reduce(function (s, c) { return s + (c.lessons_count || 0); }, 0);
-      var withImg = courses.filter(src), fan = withImg.slice(0, 5);
-      var words = courses.slice(0, 6).map(function (c) { return tr(c, 'title').replace(/[.:].*$/, ''); });
-      $app.innerHTML = '<div class="v4">' +
+      var imgs = courses.filter(src); while (imgs.length && imgs.length < 9) imgs = imgs.concat(imgs);
+      var col = function (k) { var a = imgs.filter(function (_, i) { return i % 3 === k; }); return '<div class="x-col c' + k + '"><div class="x-col-in">' + a.concat(a).map(function (c) { return pst(c); }).join('') + '</div></div>'; };
+      var titles = courses.map(function (c) { return tr(c, 'title'); });
+      var steps = [
+        {k:L('Сцена', 'Scena', 'Scene'), t:L('Дивишся сцену', 'Oglądasz scenę', 'Watch the scene'), d:L('Короткий фрагмент історії з субтитрами, які можна торкнути — кожне слово перекладається в контексті.', 'Krótki fragment historii z napisami, w które można stuknąć — każde słowo tłumaczy się w kontekście.', 'A short moment of the story with tappable subtitles — every word translates in context.')},
+        {k:L('Слова', 'Słówka', 'Words'), t:L('Ловиш нові слова', 'Łapiesz nowe słówka', 'Catch new words'), d:L('Слова зі сцени стають картками, які повертаються саме тоді, коли ти їх майже забув.', 'Słówka ze sceny stają się fiszkami, które wracają akurat wtedy, gdy prawie je zapominasz.', 'Words from the scene become cards that come back right before you forget them.')},
+        {k:L('Граматика', 'Gramatyka', 'Grammar'), t:L('Розумієш граматику', 'Rozumiesz gramatykę', 'Get the grammar'), d:L('Одна тема на урок, пояснена на репліках героїв. Без таблиць напам’ять.', 'Jeden temat na lekcję, wyjaśniony na kwestiach bohaterów. Bez tabelek na pamięć.', 'One topic per lesson, explained through the characters’ lines. No tables to memorise.')},
+        {k:L('Говоріння', 'Mówienie', 'Speaking'), t:L('Говориш вголос', 'Mówisz na głos', 'Speak out loud'), d:L('Повторюєш репліку — мікрофон оцінює вимову й підказує, що покращити.', 'Powtarzasz kwestię — mikrofon ocenia wymowę i podpowiada, co poprawić.', 'Repeat the line — the mic scores your pronunciation and shows what to improve.')}
+      ];
+      var screens = [
+        '<div class="x-scr-scene"><div class="x-scr-img">' + (imgs[0] ? pst(imgs[0]) : '') + '</div><p class="x-sub">“I solemnly swear that I am <mark>up to no good</mark>.”</p><div class="x-tip"><b>up to no good</b><small>' + L('замишляти щось погане', 'knuć coś złego', 'planning mischief') + '</small></div></div>',
+        '<div class="x-scr-cards"><div class="x-fc f1"><b>brave</b><small>' + L('сміливий', 'odważny', 'brave') + '</small></div><div class="x-fc f2"><b>wand</b><small>' + L('чарівна паличка', 'różdżka', 'wand') + '</small></div><div class="x-fc f3"><b>owl</b><small>' + L('сова', 'sowa', 'owl') + '</small></div><p class="x-due">' + IC.brain + L('Повторення завтра', 'Powtórka jutro', 'Review tomorrow') + '</p></div>',
+        '<div class="x-scr-q"><small>' + L('Друга умовна', 'Drugi tryb warunkowy', 'Second conditional') + '</small><p>If I ___ you, I’d stay home.</p><div class="x-qo"><span class="ok">were</span><span class="no">was</span><span class="no">am</span><span class="no">be</span></div></div>',
+        '<div class="x-scr-mic"><div class="x-orb">' + IC.mic + '</div><p>“It’s Levi-O-sa, not Levio-SA.”</p><div class="x-bars">' + new Array(14).join('<i></i>') + '</div><b class="x-score">92%</b></div>'
+      ];
+      $app.innerHTML = '<div class="x">' +
         /* HERO */
-        '<section class="v4-hero"><div class="v4-hero-t">' +
-          '<span class="v4-eyebrow"><i></i>' + L('Англійська · польська · українська', 'Angielski · polski · ukraiński', 'English · Polish · Ukrainian') + '</span>' +
-          '<h1>' + L('Вчи мову з фільмів, які ти вже любиш', 'Ucz się języka z filmów, które już kochasz', 'Learn a language from films you already love') + '</h1>' +
-          '<p class="v4-lead">' + L('Сьогодні — ', 'Dziś: ', 'Today: ') + '<span class="v4-rot" aria-live="polite">' + esc(words[0] || 'Harry Potter') + '</span>. ' + L('Короткі уроки зі сцен: слова в контексті, граматика без зубріння й говоріння вголос.', 'Krótkie lekcje ze scen: słówka w kontekście, gramatyka bez wkuwania i mówienie na głos.', 'Short lessons built from scenes: words in context, grammar without cramming, and speaking out loud.') + '</p>' +
-          '<div class="v4-cta"><a class="v4-btn v4-btn-a" href="#/trial">' + IC.play + L('Безкоштовний урок', 'Darmowa lekcja', 'Free lesson') + '</a><a class="v4-btn v4-btn-b" href="#/test">' + L('Тест рівня · 2 хв', 'Test poziomu · 2 min', 'Level test · 2 min') + '</a></div>' +
-          '<ul class="v4-stats"><li><b>' + courses.length + '</b>' + L('курсів', 'kursów', 'courses') + '</li><li><b>' + lessons + '</b>' + L('уроків', 'lekcji', 'lessons') + '</li><li><b>3</b>' + L('мови', 'języki', 'languages') + '</li><li><b>' + L('без', 'bez', 'no') + '</b>' + L('підписки', 'subskrypcji', 'subscription') + '</li></ul>' +
-        '</div><div class="v4-hero-v" aria-hidden="true"><div class="v4-fan">' + fan.map(function (c, i) { return poster(c, 'f' + i); }).join('') + '</div>' +
-          '<div class="v4-task" id="v4Task"><div class="v4-task-h"><span>' + L('Приклад завдання', 'Przykładowe zadanie', 'Sample task') + '</span><i>B1</i></div><div class="v4-task-bar"><i></i></div>' +
-          '<p class="v4-task-q">“If I ___ you, I’d stay home.”</p><div class="v4-task-o">' + ['was', 'were', 'am', 'would be'].map(function (o) { return '<button type="button" tabindex="-1" data-o="' + o + '">' + o + '</button>'; }).join('') + '</div>' +
-          '<p class="v4-task-f" id="v4TaskF">' + L('Обери відповідь', 'Wybierz odpowiedź', 'Pick an answer') + '</p></div></div></section>' +
-        /* KATALOG */
-        '<section class="v4-sec" id="kursy"><div class="v4-head"><div><span class="v4-k">' + L('Каталог', 'Katalog', 'Catalogue') + '</span><h2>' + L('Обери свою історію', 'Wybierz swoją historię', 'Pick your story') + '</h2></div><a class="v4-link" href="#/catalog">' + L('Усі курси', 'Wszystkie kursy', 'All courses') + IC.arrow + '</a></div>' +
-          levelChips(courses) + '<div class="v4-rail">' + courses.map(cardHtml).join('') + '</div><p class="v4-none muted" hidden>' + L('Немає курсів цього рівня.', 'Brak kursów na tym poziomie.', 'No courses at this level.') + '</p></section>' +
-        /* BENTO */
-        '<section class="v4-sec"><div class="v4-head"><div><span class="v4-k">' + L('Як це працює', 'Jak to działa', 'How it works') + '</span><h2>' + L('Не просто дивитись — розуміти', 'Nie tylko oglądać — rozumieć', 'Not just watching — understanding') + '</h2></div></div><div class="v4-bento">' +
-          bentoCard('v4-b1', L('Під твій рівень', 'Pod Twój poziom', 'At your level'), L('Тест за 2 хвилини — і бачиш курси, що тобі підходять.', 'Test w 2 minuty — i widzisz kursy, które do Ciebie pasują.', 'A 2-minute test shows the courses that fit you.'),
-            '<div class="v4-chipset"><span>Zwierzogród · A1</span><span>Przyjaciele · A2</span><span>Harry Potter · B1</span><em>' + L('Твій рівень: B1', 'Twój poziom: B1', 'Your level: B1') + '</em></div>') +
-          bentoCard('v4-b2', L('Говори як герої', 'Mów jak bohaterowie', 'Speak like the characters'), L('Повторюєш репліку — мікрофон перевіряє вимову.', 'Powtarzasz kwestię — mikrofon sprawdza wymowę.', 'Repeat the line and the mic checks your pronunciation.'),
-            '<div class="v4-mini"><div class="v4-mini-p"><span class="v4-av">H</span><div><b>Hermione</b><small>“It’s Levi-O-sa, not Levio-SA.”</small></div></div><div class="v4-mini-r">' + IC.mic + '<span class="v4-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><b>92%</b></div></div>') +
-          bentoCard('v4-b3', L('Граматика без зубріння', 'Gramatyka bez wkuwania', 'Grammar without cramming'), L('Одна тема на урок, пояснена на сцені — і зайве відпадає.', 'Jeden temat na lekcję, wyjaśniony na scenie — zbędne odpada.', 'One topic per lesson, explained through a scene.'),
-            '<div class="v4-mini"><small>If I ___ you…</small><p class="ok">' + IC.check + 'were</p><p class="x">was</p><p class="x">am</p></div>') +
-          bentoCard('v4-b4', L('Слова повертаються', 'Słówka wracają', 'Words come back'), L('Повторення в правильний момент — запам’ятовуєш надовго.', 'Powtórka we właściwym momencie — zapamiętujesz na długo.', 'Reviews at the right moment, so words stick.'),
-            '<div class="v4-mini"><small>' + L('Повторення на сьогодні', 'Powtórka na dziś', 'Today’s review') + '</small><p>' + IC.check + 'stay — zostać</p><p class="flag"><span class="v4-dot"></span>bored — znudzony<em data-a="' + esc(L('Опановано', 'Opanowane', 'Mastered')) + '">' + L('Повтори', 'Powtórz', 'Review') + '</em></p><p>' + IC.check + 'brave — odważny</p></div>') +
-        '</div></section>' +
-        /* CENNIK */
-        '<section class="v4-sec" id="pricing"><div class="v4-head"><div><span class="v4-k">' + L('Ціни', 'Cennik', 'Pricing') + '</span><h2>' + L('Платиш один раз', 'Płacisz raz', 'Pay once') + '</h2></div></div><div class="v4-plans">' +
-          '<div class="v4-plan"><span class="v4-k">' + L('Один курс', 'Jeden kurs', 'One course') + '</span><div class="v4-price">' + esc(one) + '</div><ul><li>' + IC.check + L('Усі уроки курсу', 'Wszystkie lekcje kursu', 'Every lesson in the course') + '</li><li>' + IC.check + L('Сертифікат', 'Certyfikat', 'Certificate') + '</li><li>' + IC.check + L('Доступ назавжди', 'Dostęp na zawsze', 'Lifetime access') + '</li></ul><a class="v4-btn v4-btn-b" href="#/catalog">' + L('Обрати курс', 'Wybierz kurs', 'Choose a course') + '</a></div>' +
-          '<div class="v4-plan hot"><span class="v4-tag">' + L('Найвигідніше', 'Najkorzystniej', 'Best value') + '</span><span class="v4-k">' + L('Усі курси', 'Wszystkie kursy', 'All courses') + '</span><div class="v4-price">' + esc(bundle) + '</div><ul><li>' + IC.check + courses.length + ' ' + L('курсів і нові прем’єри', 'kursów i nowe premiery', 'courses plus new releases') + '</li><li>' + IC.check + L('3 мови навчання', '3 języki nauki', '3 languages') + '</li><li>' + IC.check + L('Без підписки', 'Bez subskrypcji', 'No subscription') + '</li></ul><button type="button" class="v4-btn v4-btn-a" data-buy-bundle>' + L('Купити пакет', 'Kup pakiet', 'Buy bundle') + '</button></div>' +
-        '</div><p class="v4-pay">BLIK · Przelewy24 · ' + L('картка', 'karta', 'card') + ' · <a href="#/gift">' + L('Подарувати курс', 'Podaruj kurs', 'Gift a course') + '</a></p></section>' +
-        /* FAQ + CTA */
-        '<section class="v4-sec v4-faq">' + (typeof faqHtml === 'function' ? faqHtml() : '') + '</section>' +
-        '<section class="v4-final"><h2>' + L('Перша сцена чекає', 'Pierwsza scena czeka', 'Your first scene is waiting') + '</h2><p>' + L('10 хвилин, без картки й реєстрації.', '10 minut, bez karty i rejestracji.', '10 minutes, no card, no sign-up.') + '</p><a class="v4-btn v4-btn-a" href="#/trial">' + IC.play + L('Почати безкоштовно', 'Zacznij za darmo', 'Start free') + '</a></section>' +
+        '<section class="x-hero"><div class="x-wall" aria-hidden="true" data-par="-0.12">' + col(0) + col(1) + col(2) + '</div><div class="x-hero-shade" aria-hidden="true"></div>' +
+          '<div class="x-hero-in"><span class="x-pill" data-r><i></i>' + L('Англійська · польська · українська', 'Angielski · polski · ukraiński', 'English · Polish · Ukrainian') + '</span>' +
+          '<h1 class="x-h1 x-split" data-r>' + split(L('Вчи мову з фільмів, які ти вже любиш', 'Ucz się języka z filmów, które już kochasz', 'Learn a language from the films you already love')) + '</h1>' +
+          '<p class="x-lead" data-r>' + L('Інтерактивні уроки зі сцен фільмів і серіалів. 10 хвилин на день — і ти розумієш героїв без субтитрів.', 'Interaktywne lekcje ze scen filmów i seriali. 10 minut dziennie — i rozumiesz bohaterów bez napisów.', 'Interactive lessons built from film and series scenes. 10 minutes a day until you understand the characters without subtitles.') + '</p>' +
+          '<div class="x-cta" data-r><a class="x-btn x-btn-a" href="#/trial">' + IC.play + L('Безкоштовний урок', 'Darmowa lekcja', 'Free lesson') + '</a><a class="x-btn x-btn-g" href="#/test">' + L('Мій рівень · 2 хв', 'Mój poziom · 2 min', 'My level · 2 min') + '</a></div>' +
+          '<div class="x-scrollhint" aria-hidden="true"><i></i></div></div></section>' +
+        /* MARQUEE */
+        '<div class="x-marq" aria-hidden="true"><div class="x-marq-in">' + titles.concat(titles).map(function (t) { return '<span>' + esc(t) + '</span><i>✦</i>'; }).join('') + '</div></div>' +
+        /* STATS */
+        '<section class="x-sec x-stats">' + [[courses.length, L('курсів', 'kursów', 'courses')], [lessons, L('уроків', 'lekcji', 'lessons')], [3, L('мови навчання', 'języki nauki', 'languages')], [10, L('хвилин на день', 'minut dziennie', 'minutes a day')]].map(function (s, i) { return '<div class="x-stat" data-r style="--d:' + i * 80 + 'ms"><b data-count="' + s[0] + '">0</b><span>' + s[1] + '</span></div>'; }).join('') + '</section>' +
+        /* STORY (przypięta) */
+        '<section class="x-story" data-pin="story"><div class="x-pinbox"><div class="x-story-t"><span class="x-k">' + L('Як проходить урок', 'Jak wygląda lekcja', 'How a lesson works') + '</span>' +
+          steps.map(function (s, i) { return '<div class="x-step' + (i ? '' : ' on') + '"><span class="x-step-n">0' + (i + 1) + ' · ' + s.k + '</span><h2>' + s.t + '</h2><p>' + s.d + '</p></div>'; }).join('') +
+          '<div class="x-story-bar"><i></i></div></div><div class="x-phone"><div class="x-notch"></div>' + screens.map(function (s, i) { return '<div class="x-scr' + (i ? '' : ' on') + '">' + s + '</div>'; }).join('') + '</div></div></section>' +
+        /* RAIL (poziome przewijanie) */
+        '<section class="x-rail" data-pin="rail"><div class="x-pinbox"><div class="x-head"><div><span class="x-k">' + L('Каталог', 'Katalog', 'Catalogue') + '</span><h2 class="x-h2">' + L('Обери свою історію', 'Wybierz swoją historię', 'Pick your story') + '</h2></div><a class="x-link" href="#/catalog">' + L('Усі курси', 'Wszystkie kursy', 'All courses') + IC.arrow + '</a></div>' +
+          '<div class="x-track">' + courses.map(function (c) { return card(c); }).join('') + '</div></div></section>' +
+        /* WHY */
+        '<section class="x-sec"><div class="x-head" data-r><div><span class="x-k">' + L('Чому це працює', 'Dlaczego to działa', 'Why it works') + '</span><h2 class="x-h2">' + L('Мова, яка тримається в голові', 'Język, który zostaje w głowie', 'Language that sticks') + '</h2></div></div><div class="x-why">' +
+          [[IC.film, L('Емоції допомагають пам’яті', 'Emocje pomagają pamięci', 'Emotion helps memory'), L('Слова з улюбленої сцени запам’ятовуються в рази краще, ніж зі списку.', 'Słówka z ulubionej sceny zapamiętujesz o wiele lepiej niż z listy.', 'Words from a scene you love stick far better than words from a list.')],
+           [IC.brain, L('Повторення в потрібний момент', 'Powtórka we właściwym momencie', 'Reviews at the right time'), L('Розумний алгоритм повертає слово перед тим, як воно зникне.', 'Algorytm przypomina słówko, zanim zdążysz je zapomnieć.', 'A smart schedule brings words back just before they fade.')],
+           [IC.chat, L('Розмови з героями', 'Rozmowy z bohaterami', 'Chat with characters'), L('Тренуй діалоги з персонажами курсу в чаті.', 'Ćwicz dialogi z postaciami kursu na czacie.', 'Practise dialogues with the course characters in chat.')],
+           [IC.star, L('Квести й сертифікат', 'Questy i certyfikat', 'Quests and a certificate'), L('Боси арок, фракції, рейтинг друзів і сертифікат у кінці.', 'Bossowie łuków, frakcje, ranking znajomych i certyfikat na koniec.', 'Arc bosses, factions, a friends leaderboard and a certificate at the end.')]
+          ].map(function (w, i) { return '<article class="x-why-c" data-r style="--d:' + i * 90 + 'ms"><span class="x-why-i">' + w[0] + '</span><h3>' + w[1] + '</h3><p>' + w[2] + '</p></article>'; }).join('') + '</div></section>' +
+        /* PRICING */
+        '<section class="x-sec" id="pricing"><div class="x-head" data-r><div><span class="x-k">' + L('Ціни', 'Cennik', 'Pricing') + '</span><h2 class="x-h2">' + L('Платиш один раз. Назавжди.', 'Płacisz raz. Na zawsze.', 'Pay once. Keep it forever.') + '</h2></div></div><div class="x-plans">' +
+          '<div class="x-plan" data-r data-tilt><span class="x-k">' + L('Один курс', 'Jeden kurs', 'One course') + '</span><div class="x-price">' + esc(one) + '</div><ul><li>' + IC.check + L('Усі уроки курсу', 'Wszystkie lekcje kursu', 'Every lesson in the course') + '</li><li>' + IC.check + L('Сертифікат', 'Certyfikat', 'Certificate') + '</li><li>' + IC.check + L('Доступ назавжди', 'Dostęp na zawsze', 'Lifetime access') + '</li></ul><a class="x-btn x-btn-g" href="#/catalog">' + L('Обрати курс', 'Wybierz kurs', 'Choose a course') + '</a></div>' +
+          '<div class="x-plan hot" data-r data-tilt style="--d:120ms"><span class="x-badge">' + L('Найвигідніше', 'Najkorzystniej', 'Best value') + '</span><span class="x-k">' + L('Усі курси', 'Wszystkie kursy', 'All courses') + '</span><div class="x-price">' + esc(bundle) + '</div><ul><li>' + IC.check + courses.length + ' ' + L('курсів + нові прем’єри', 'kursów + nowe premiery', 'courses + new releases') + '</li><li>' + IC.check + L('Англійська, польська, українська', 'Angielski, polski, ukraiński', 'English, Polish, Ukrainian') + '</li><li>' + IC.check + L('Без підписки', 'Bez subskrypcji', 'No subscription') + '</li></ul><button type="button" class="x-btn x-btn-a" data-buy-bundle>' + L('Купити пакет', 'Kup pakiet', 'Buy the bundle') + '</button></div>' +
+        '</div><p class="x-pay" data-r>BLIK · Przelewy24 · ' + L('картка', 'karta', 'card') + ' · <a href="#/gift">' + L('Подарувати курс', 'Podaruj kurs', 'Gift a course') + '</a></p></section>' +
+        '<section class="x-sec x-faq" data-r>' + (typeof faqHtml === 'function' ? faqHtml() : '') + '</section>' +
+        /* FINAL */
+        '<section class="x-final" data-pin="final"><div class="x-pinbox"><h2 class="x-final-h">' + L('Перша сцена вже чекає', 'Pierwsza scena już czeka', 'Your first scene is waiting') + '</h2><p>' + L('Без картки, без реєстрації, 10 хвилин.', 'Bez karty, bez rejestracji, 10 minut.', 'No card, no sign-up, 10 minutes.') + '</p><a class="x-btn x-btn-a x-btn-xl" href="#/trial">' + IC.play + L('Почати безкоштовно', 'Zacznij za darmo', 'Start free') + '</a></div></section>' +
       '</div>';
-      bindLevels($app); heroLife(words); bentoLife();
+      life($app);
     });
   }
-  function bentoCard(id, t, d, vis) { return '<article class="v4-bc ' + id + '"><div class="v4-bc-v">' + vis + '</div><h3>' + t + '</h3><p>' + d + '</p></article>'; }
 
-  var rotT = null;
-  function heroLife(words) {
-    clearInterval(rotT); var el = $app.querySelector('.v4-rot'), i = 0;
-    if (el && words.length > 1 && !matchMedia('(prefers-reduced-motion: reduce)').matches) rotT = setInterval(function () { if (!document.body.contains(el)) return clearInterval(rotT); el.classList.add('out'); setTimeout(function () { i = (i + 1) % words.length; el.textContent = words[i]; el.classList.remove('out'); }, 260); }, 2600);
-    var box = document.getElementById('v4Task'); if (!box) return;
-    box.querySelectorAll('[data-o]').forEach(function (b) { b.tabIndex = 0; b.onclick = function () {
-      var ok = b.dataset.o === 'were'; box.querySelectorAll('[data-o]').forEach(function (x) { x.classList.toggle('right', x.dataset.o === 'were'); x.classList.toggle('wrong', x === b && !ok); });
-      box.querySelector('.v4-task-bar i').style.width = '100%';
-      document.getElementById('v4TaskF').textContent = ok ? L('Так! Друга умовна: If + Past Simple → were для всіх осіб.', 'Tak! Drugi tryb warunkowy: If + Past Simple → were dla każdej osoby.', 'Yes! Second conditional: If + Past Simple → were for every person.') : L('Майже. Тут потрібно were — друга умовна.', 'Prawie. Tu potrzeba were — drugi tryb warunkowy.', 'Almost. This needs were — second conditional.');
-    }; });
-  }
-  function bentoLife() {
-    var cards = $app.querySelectorAll('.v4-bc'); if (!('IntersectionObserver' in window)) { cards.forEach(function (c) { c.classList.add('v4-on'); }); return; }
-    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('v4-on'); io.unobserve(e.target); var f = e.target.querySelector('.flag em'); if (f) setTimeout(function () { f.textContent = f.dataset.a; f.parentNode.classList.add('done'); }, 2400); } }); }, {threshold:0.45});
-    cards.forEach(function (c) { io.observe(c); });
+  /* =================== PULPIT (po zalogowaniu) =================== */
+  function viewDashX() {
+    return Promise.all([API.listCourses(false), API.myEnrollments().catch(function () { return []; }), API.myProgress().catch(function () { return []; })]).then(function (r) {
+      var courses = r[0], enr = r[1], prog = r[2], done = {}; prog.forEach(function (p) { done[p.lesson_id] = p; });
+      var mine = courses.filter(function (c) { return enr.indexOf(c.id) > -1 || isFreeCourse(c); }), other = courses.filter(function (c) { return mine.indexOf(c) < 0; });
+      var g = goalOf(), name = first(USER.name || USER.email);
+      $app.innerHTML = '<div class="x x-dash">' +
+        '<section class="x-dhero"><div class="x-dhero-bg" aria-hidden="true" data-par="0.08"></div><div class="x-dhero-t" data-r><span class="x-k">' + new Date().toLocaleDateString(LANG === 'uk' ? 'uk-UA' : LANG === 'en' ? 'en-GB' : 'pl-PL', {weekday:'long', day:'numeric', month:'long'}) + '</span><h1 class="x-h1 x-split">' + split(greet() + (name ? ', ' + name : '') + '!') + '</h1><p class="x-lead">' + L('Готовий до наступної сцени?', 'Gotowy na kolejną scenę?', 'Ready for the next scene?') + '</p></div>' +
+          '<div class="x-next" id="xNext" data-r><div class="x-next-sk"></div></div></section>' +
+        '<section class="x-sec x-tiles">' +
+          '<div class="x-tile x-t-streak" data-r><span class="x-ti">' + IC.fire + '</span><b id="xStreak" data-count="0">0</b><span>' + L('днів поспіль', 'dni z rzędu', 'day streak') + '</span><div class="x-week" id="xWeek">' + new Array(8).join('<i></i>') + '</div></div>' +
+          '<div class="x-tile x-t-goal" data-r style="--d:80ms"><div id="xGoal">' + ring(0, 92, 10) + '</div><div><b>' + L('Мета дня', 'Cel dnia', 'Daily goal') + '</b><span id="xGoalT">' + g.l + ' ' + L('урок', 'lekcja', 'lesson') + ' · ' + g.r + ' ' + L('слів', 'słówek', 'words') + '</span></div></div>' +
+          '<a class="x-tile x-t-words" href="#/words" data-r style="--d:160ms"><span class="x-ti">' + IC.brain + '</span><b id="xDue">—</b><span>' + L('слів до повторення', 'słówek do powtórki', 'words to review') + '</span></a>' +
+          '<a class="x-tile x-t-chat" href="#/chats" data-r style="--d:240ms"><span class="x-ti">' + IC.chat + '</span><b>' + L('Чати', 'Czaty', 'Chats') + '</b><span>' + L('поговори з героями', 'porozmawiaj z bohaterami', 'talk to the characters') + '</span></a>' +
+        '</section>' +
+        '<section class="x-sec"><div class="x-head" data-r><div><span class="x-k">' + L('Мої марафони', 'Moje maratony', 'My marathons') + '</span><h2 class="x-h2">' + L('Продовжуй історію', 'Kontynuuj historię', 'Keep the story going') + '</h2></div><a class="x-link" href="#/cabinet">' + L('Кабінет', 'Kabinet', 'Account') + IC.arrow + '</a></div>' +
+          (mine.length ? '<div class="x-mine" id="xMine">' + mine.map(function (c) { return '<a class="x-mc" data-r href="#/course/' + esc(c.id) + '" data-cid="' + esc(c.id) + '">' + pst(c) + '<div class="x-mc-b"><b>' + esc(tr(c, 'title')) + '</b><span class="x-mc-m">' + esc(c.level || '') + ' · <i data-n>…</i></span><span class="x-bar"><i></i></span></div></a>'; }).join('') + '</div>'
+            : '<div class="x-empty" data-r><p>' + L('У тебе ще немає курсів. Почни з безкоштовного уроку або обери історію.', 'Nie masz jeszcze kursów. Zacznij od darmowej lekcji albo wybierz historię.', 'No courses yet. Start with a free lesson or pick a story.') + '</p><div class="x-cta"><a class="x-btn x-btn-a" href="#/trial">' + IC.play + L('Безкоштовний урок', 'Darmowa lekcja', 'Free lesson') + '</a><a class="x-btn x-btn-g" href="#/catalog">' + L('Каталог', 'Katalog', 'Catalogue') + '</a></div></div>') + '</section>' +
+        (other.length ? '<section class="x-sec"><div class="x-head" data-r><div><span class="x-k">' + L('Для тебе', 'Dla Ciebie', 'For you') + '</span><h2 class="x-h2">' + L('Що подивитись далі', 'Co obejrzeć dalej', 'What to watch next') + '</h2></div></div><div class="x-grid">' + other.slice(0, 8).map(function (c) { return card(c); }).join('') + '</div></section>' : '') +
+        '<section class="x-sec x-quick" data-r>' + [['#/guide', IC.book, L('Посібник', 'Poradnik', 'Guide')], ['#/test', IC.target, L('Тест рівня', 'Test poziomu', 'Level test')], ['#/top', IC.star, L('Рейтинг', 'Ranking', 'Leaderboard')], ['#/cabinet', IC.gear, L('Налаштування', 'Ustawienia', 'Settings')]].concat(USER.role === 'admin' ? [['#/admin', IC.gear, L('Адмін', 'Admin', 'Admin')]] : []).map(function (q) { return '<a href="' + q[0] + '">' + q[1] + '<span>' + q[2] + '</span></a>'; }).join('') + '</section>' +
+      '</div>';
+      life($app);
+      /* następna lekcja */
+      var nx = null, nc = null;
+      var tasks = mine.map(function (c) { return API.listLessons(c.id).then(function (ls) { var d = ls.filter(function (l) { return done[l.id]; }).length, el = $app.querySelector('.x-mc[data-cid="' + c.id + '"]'); if (el) { el.querySelector('[data-n]').textContent = d + ' / ' + ls.length; el.querySelector('.x-bar i').style.width = (ls.length ? d / ls.length * 100 : 0) + '%'; } if (!nx) { var n = ls.filter(function (l) { return !done[l.id] && lessonTasks(l); })[0]; if (n && (d > 0 || !nx)) { nx = n; nc = c; nx._d = d; nx._n = ls.length; } } }).catch(function () {}); });
+      Promise.all(tasks).then(function () {
+        var box = document.getElementById('xNext'); if (!box) return;
+        if (!nx) { box.innerHTML = '<a class="x-next-c" href="#/catalog"><div class="x-next-b"><span class="x-k">' + L('Почни нову історію', 'Zacznij nową historię', 'Start a new story') + '</span><b>' + L('Обери курс у каталозі', 'Wybierz kurs w katalogu', 'Pick a course in the catalogue') + '</b></div><span class="x-next-go">' + IC.arrow + '</span></a>'; return; }
+        box.innerHTML = '<a class="x-next-c" href="#/lesson/' + esc(nx.id) + '"><div class="x-next-p">' + pst(nc) + '</div><div class="x-next-b"><span class="x-k">' + (nx._d ? L('Продовжити', 'Kontynuuj', 'Continue') : L('Почати', 'Zacznij', 'Start')) + ' · ' + esc(tr(nc, 'title')) + '</span><b>' + L('Урок', 'Lekcja', 'Lesson') + ' ' + nx.num + ' · ' + esc(tr(nx, 'title')) + '</b><small>' + esc(lGram(nx) || '') + '</small><span class="x-bar"><i style="width:' + (nx._n ? nx._d / nx._n * 100 : 0) + '%"></i></span></div><span class="x-next-go">' + IC.play + '</span></a>';
+      });
+      loadActivity().then(function (a) {
+        var s = document.getElementById('xStreak'); if (!s) return; s.dataset.count = a.streak; count(s);
+        var idx = (new Date().getDay() + 6) % 7; document.querySelectorAll('#xWeek i').forEach(function (el, i) { var off = i - idx; if (off <= 0 && a.days[todayStr(off)]) el.className = 'on'; if (off === 0) el.classList.add('now'); });
+        var pct = Math.min(1, (Math.min(a.today.l, g.l) / Math.max(g.l, 1) + Math.min(a.today.r, g.r) / Math.max(g.r, 1)) / 2);
+        var gb = document.getElementById('xGoal'); if (gb) { gb.innerHTML = ring(pct, 92, 10) + '<b class="x-ring-t">' + Math.round(pct * 100) + '%</b>'; setTimeout(function () { var c = gb.querySelector('.x-ring-v'); if (c) c.style.strokeDashoffset = c.dataset.off; }, 60); }
+      }).catch(function () {});
+      srsRows().then(function (rows) { var d = document.getElementById('xDue'); if (!d) return; var t = todayStr(); d.dataset.count = Object.keys(rows).filter(function (k) { return rows[k].due <= t; }).length; count(d); }).catch(function () { var d = document.getElementById('xDue'); if (d) d.textContent = '0'; });
+    });
   }
 
-  /* ---------- katalog ---------- */
-  function viewCatalogV4() {
+  /* =================== KATALOG =================== */
+  function viewCatalogX() {
     return API.listCourses(false).then(function (courses) {
-      $app.innerHTML = '<div class="v4"><section class="v4-sec v4-top"><div class="v4-head"><div><span class="v4-k">' + L('Каталог', 'Katalog', 'Catalogue') + '</span><h2>' + L('Фільми та серіали', 'Filmy i seriale', 'Films & series') + '</h2></div></div>' +
-        '<div class="v4-tools">' + levelChips(courses) + '<input type="search" class="v4-search" id="v4Q" placeholder="' + esc(L('Пошук…', 'Szukaj…', 'Search…')) + '" aria-label="' + esc(L('Пошук курсу', 'Szukaj kursu', 'Search courses')) + '"></div>' +
-        '<div class="v4-grid">' + courses.map(cardHtml).join('') + '</div><p class="v4-none muted" hidden>' + L('Нічого не знайдено.', 'Nic nie znaleziono.', 'Nothing found.') + '</p></section></div>';
-      bindLevels($app);
-      var q = document.getElementById('v4Q'); q.oninput = function () { var s = q.value.trim().toLowerCase(), n = 0; $app.querySelectorAll('.v4-card').forEach(function (c) { var hit = !s || c.textContent.toLowerCase().indexOf(s) > -1; if (s) c.hidden = !hit; else c.hidden = false; if (!c.hidden) n++; }); if (!s) bindLevels($app); $app.querySelector('.v4-none').hidden = n > 0; };
+      var feat = courses.filter(src).slice(-1)[0] || courses[0];
+      $app.innerHTML = '<div class="x x-cat">' +
+        (feat ? '<section class="x-feat"><div class="x-feat-bg" aria-hidden="true" data-par="0.18" style="background-image:url(\'' + esc(src(feat)) + '\')"></div><div class="x-feat-in" data-r><span class="x-k">' + L('Прем’єра', 'Premiera', 'New release') + '</span><h1 class="x-h1">' + esc(tr(feat, 'title')) + '</h1><p class="x-lead">' + esc(String(tr(feat, 'description') || '').slice(0, 170)) + (String(tr(feat, 'description') || '').length > 170 ? '…' : '') + '</p><div class="x-cta"><a class="x-btn x-btn-a" href="#/course/' + esc(feat.id) + '">' + IC.play + L('Відкрити курс', 'Otwórz kurs', 'Open course') + '</a><span class="x-chip big">' + esc(feat.level || '') + '</span></div></div></section>' : '') +
+        '<section class="x-sec"><div class="x-head" data-r><div><span class="x-k">' + L('Каталог', 'Katalog', 'Catalogue') + '</span><h2 class="x-h2">' + L('Фільми та серіали', 'Filmy i seriale', 'Films & series') + '</h2></div></div>' +
+          '<div class="x-tools" data-r><label class="x-search">' + IC.search + '<input class="x-q" type="search" placeholder="' + esc(L('Пошук фільму чи серіалу…', 'Szukaj filmu lub serialu…', 'Search films and series…')) + '" aria-label="' + esc(L('Пошук курсу', 'Szukaj kursu', 'Search courses')) + '"></label>' + chips(courses, true) + '</div>' +
+          '<div class="x-grid">' + courses.map(function (c) { return card(c); }).join('') + '</div><p class="x-none" hidden>' + L('Нічого не знайдено. Спробуй інший рівень.', 'Nic nie znaleziono. Spróbuj innego poziomu.', 'Nothing found. Try another level.') + '</p>' +
+          '<p class="x-hint" data-r>' + L('Не знаєш свого рівня? ', 'Nie znasz swojego poziomu? ', 'Not sure of your level? ') + '<a href="#/test">' + L('Тест за 2 хвилини', 'Test w 2 minuty', 'Take the 2-minute test') + '</a></p></section></div>';
+      life($app); bindFilter($app);
     });
   }
 
-  var _vh4 = viewHome; viewHome = function () { return USER ? _vh4() : viewHomeV4(); };
-  var _vc4 = viewCatalog; viewCatalog = function () { return viewCatalogV4(); };
+  /* =================== STRONA KURSU =================== */
+  function viewCourseX(id) {
+    return Promise.all([API.getCourse(id), API.listLessons(id), API.myEnrollments().catch(function () { return []; }), API.myProgress().catch(function () { return []; })]).then(function (r) {
+      var c = r[0], ls = r[1]; if (!c) { $app.innerHTML = '<div class="x"><div class="x-empty">' + L('Курс не знайдено.', 'Nie znaleziono kursu.', 'Course not found.') + ' <a href="#/catalog">' + L('До каталогу', 'Do katalogu', 'To the catalogue') + '</a></div></div>'; return; }
+      var enrolled = r[2].indexOf(id) > -1 || isAdm() || isFreeCourse(c), done = {}; r[3].forEach(function (p) { done[p.lesson_id] = p; });
+      var nDone = ls.filter(function (l) { return done[l.id]; }).length, pct = ls.length ? nDone / ls.length : 0;
+      var next = ls.filter(function (l, i) { return !done[l.id] && lessonTasks(l) && (enrolled || (i === 0 && c.free_first !== false)); })[0];
+      var arcs = [], cur = null; ls.forEach(function (l, i) { var a = arcOf(l) || L('Уроки', 'Lekcje', 'Lessons'); if (!cur || cur.t !== a) { cur = {t:a, ls:[]}; arcs.push(cur); } cur.ls.push({l:l, i:i}); });
+      var gram = {}; ls.forEach(function (l) { var gtxt = lGram(l); if (gtxt && !/^(Повтор|Review|Powt|Arc|Final|Усе|Уся|All)/i.test(gtxt)) gram[gtxt] = 1; });
+      var cta = enrolled ? (next ? '<a class="x-btn x-btn-a" href="#/lesson/' + esc(next.id) + '">' + IC.play + (nDone ? L('Продовжити', 'Kontynuuj', 'Continue') : L('Почати курс', 'Zacznij kurs', 'Start the course')) + ' · ' + L('урок', 'lekcja', 'lesson') + ' ' + next.num + '</a>' : '<span class="x-chip big ok">' + IC.check + L('Курс пройдено', 'Kurs ukończony', 'Course completed') + '</span>')
+        : (next ? '<a class="x-btn x-btn-a" href="#/lesson/' + esc(next.id) + '">' + IC.play + L('Безкоштовний урок 1', 'Darmowa lekcja 1', 'Free lesson 1') + '</a>' : '') + '<button type="button" class="x-btn x-btn-g" data-buy-course="' + esc(c.id) + '">' + L('Купити курс · ', 'Kup kurs · ', 'Buy course · ') + esc(c.price || '') + '</button>' + (USER ? '<a class="x-link" href="#/cabinet">' + L('Маю ключ', 'Mam klucz', 'I have a key') + IC.arrow + '</a>' : '');
+      $app.innerHTML = '<div class="x x-course">' +
+        '<section class="x-chero"><div class="x-chero-bg" aria-hidden="true" data-par="0.22" style="background-image:url(\'' + esc(src(c)) + '\')"></div><div class="x-chero-in">' +
+          '<div class="x-chero-p" data-r>' + pst(c) + '</div><div class="x-chero-t" data-r><div class="x-chips-s"><span class="x-chip">' + esc(c.level || '') + '</span><span class="x-chip">' + (c.kind === 'series' ? L('Серіал', 'Serial', 'Series') : L('Фільм', 'Film', 'Film')) + '</span><span class="x-chip">' + ls.length + ' ' + L('уроків', 'lekcji', 'lessons') + '</span>' + (enrolled ? '<span class="x-chip ok">' + IC.check + L('Відкрито', 'Odblokowany', 'Unlocked') + '</span>' : '') + '</div>' +
+          '<h1 class="x-h1">' + esc(tr(c, 'title')) + '</h1><p class="x-lead">' + esc(tr(c, 'description') || '') + '</p><div class="x-cta">' + cta + '</div></div>' +
+          (enrolled ? '<div class="x-chero-r" data-r>' + ring(pct, 132, 12, Math.round(pct * 100) + '%') + '<b class="x-ring-t">' + Math.round(pct * 100) + '%</b><span>' + nDone + ' / ' + ls.length + ' ' + L('уроків', 'lekcji', 'lessons') + '</span></div>' : '') +
+        '</div></section>' +
+        (Object.keys(gram).length ? '<section class="x-sec"><div class="x-head" data-r><div><span class="x-k">' + L('Що ти вивчиш', 'Czego się nauczysz', 'What you’ll learn') + '</span><h2 class="x-h2">' + L('Граматика курсу', 'Gramatyka kursu', 'Course grammar') + '</h2></div></div><div class="x-gram" data-r>' + Object.keys(gram).slice(0, 18).map(function (gt, i) { return '<span style="--d:' + i * 30 + 'ms">' + esc(gt) + '</span>'; }).join('') + '</div></section>' : '') +
+        '<section class="x-sec x-arcs"><div class="x-head" data-r><div><span class="x-k">' + L('Програма', 'Program', 'Programme') + '</span><h2 class="x-h2">' + arcs.length + ' ' + (arcs.length > 1 ? L('арок історії', 'łuków fabuły', 'story arcs') : L('частина', 'część', 'part')) + '</h2></div></div>' +
+          arcs.map(function (a, ai) {
+            var ad = a.ls.filter(function (x) { return done[x.l.id]; }).length;
+            return '<div class="x-arc" data-r><div class="x-arc-h"><span class="x-arc-n">' + String(ai + 1).padStart(2, '0') + '</span><div><b>' + esc(a.t) + '</b><small>' + ad + ' / ' + a.ls.length + '</small></div><span class="x-bar"><i style="width:' + (a.ls.length ? ad / a.ls.length * 100 : 0) + '%"></i></span></div><ol class="x-ls">' +
+              a.ls.map(function (x) { var l = x.l, avail = !!lessonTasks(l), free0 = x.i === 0 && c.free_first !== false, open = (enrolled || free0) && avail, d = done[l.id], boss = /boss|egzamin|exam|іспит|бос/i.test(tr(l, 'title'));
+                var inner = '<span class="x-ln">' + (d ? IC.check : String(l.num).padStart(2, '0')) + '</span><span class="x-lt"><b>' + esc(tr(l, 'title')) + '</b><small>' + esc(lGram(l) || '') + (free0 && !enrolled ? ' · ' + L('безкоштовно', 'za darmo', 'free') : '') + (!avail ? ' · ' + L('скоро цією мовою', 'wkrótce w tym języku', 'coming in this language') : '') + '</small></span>' + (d ? '<span class="x-ls-s">' + esc(scoreTxt(d)) + '</span>' : open ? '<span class="x-ls-go">' + IC.play + '</span>' : '<span class="x-ls-lock">' + IC.lock + '</span>');
+                return '<li class="' + (d ? 'done ' : '') + (boss ? 'boss ' : '') + (open ? 'open' : 'locked') + '">' + (open ? '<a href="#/lesson/' + esc(l.id) + '">' + inner + '</a>' : '<div>' + inner + '</div>') + '</li>'; }).join('') + '</ol></div>';
+          }).join('') + '</section>' +
+        (isAdm() ? '<p class="x-hint"><a href="#" id="xOldCourse">' + L('Старий вигляд сторінки (інструменти адміна)', 'Stary widok strony (narzędzia admina)', 'Old page view (admin tools)') + '</a></p>' : '') +
+      '</div>';
+      life($app);
+      var oc = document.getElementById('xOldCourse'); if (oc) oc.onclick = function (e) { e.preventDefault(); OLD_ONCE = true; ROUTE_LAST = null; route(); };
+    });
+  }
+
+  /* =================== KABINET: nowy nagłówek =================== */
+  function cabHero() {
+    if (!USER || !$app.querySelector('.page') || $app.querySelector('.x-cab')) return;
+    var name = USER.name || first(USER.email), ini = String(name || '?').trim().split(/\s+/).map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
+    var box = document.createElement('section'); box.className = 'x x-cab';
+    box.innerHTML = '<div class="x-cab-in" data-r><span class="x-av">' + esc(ini) + '</span><div class="x-cab-t"><span class="x-k">' + L('Кабінет', 'Kabinet', 'Account') + '</span><h1 class="x-h1">' + esc(name) + '</h1><p class="x-lead">' + esc(USER.email || '') + '</p></div></div>' +
+      '<div class="x-cab-s"><div class="x-tile" data-r><span class="x-ti">' + IC.fire + '</span><b id="xcStreak" data-count="0">0</b><span>' + L('днів поспіль', 'dni z rzędu', 'day streak') + '</span></div><div class="x-tile" data-r style="--d:80ms"><span class="x-ti">' + IC.star + '</span><b id="xcBest" data-count="0">0</b><span>' + L('рекорд серії', 'najdłuższa seria', 'best streak') + '</span></div><div class="x-tile" data-r style="--d:160ms"><span class="x-ti">' + IC.book + '</span><b id="xcDone" data-count="0">0</b><span>' + L('уроків пройдено', 'ukończonych lekcji', 'lessons done') + '</span></div><div class="x-tile" data-r style="--d:240ms"><span class="x-ti">' + IC.brain + '</span><b id="xcWords" data-count="0">0</b><span>' + L('слів у словнику', 'słówek w słowniku', 'words saved') + '</span></div></div>';
+    $app.insertBefore(box, $app.firstChild);
+    life($app);
+    loadActivity().then(function (a) { var s = document.getElementById('xcStreak'), b = document.getElementById('xcBest'); if (s) { s.dataset.count = a.streak; count(s); } if (b) { b.dataset.count = a.best; count(b); } }).catch(function () {});
+    Promise.all(LANGS.map(function (l) { return API.myProgress(l).catch(function () { return []; }); })).then(function (ps) { var e = document.getElementById('xcDone'); if (e) { e.dataset.count = ps.reduce(function (s, p) { return s + p.length; }, 0); count(e); } });
+    srsRows().then(function (rows) { var e = document.getElementById('xcWords'); if (e) { e.dataset.count = Object.keys(rows).length; count(e); } }).catch(function () {});
+  }
+
+  /* ---------- podpięcie widoków ---------- */
+  var OLD_ONCE = false;
+  var _home = viewHome, _cat = viewCatalog, _course = viewCourse, _cab = viewCabinet;
+  viewHome = function () { return USER ? viewDashX() : viewHomeX(); };
+  viewCatalog = function () { return viewCatalogX(); };
+  viewCourse = function (id) { if (OLD_ONCE) { OLD_ONCE = false; return _course(id); } return viewCourseX(id); };
+  viewCabinet = function () { return Promise.resolve(_cab()).then(function () { try { cabHero(); } catch (e) {} }); };
+  /* inne strony: tylko animacja pojawiania */
+  var _route = route;
+  window.addEventListener('hashchange', function () { setTimeout(function () { if (!$app.querySelector('.x')) { scrollFns = scrollFns.filter(function () { return false; }); life($app); } }, 400); });
+  /* przełącznik w stopce */
+  document.addEventListener('DOMContentLoaded', addSwitch); setTimeout(addSwitch, 1500);
+  function addSwitch() { var f = document.querySelector('footer'); if (!f || document.getElementById('xSw')) return; var a = document.createElement('a'); a.id = 'xSw'; a.href = '#'; a.className = 'x-sw'; a.textContent = L('Повернути старий вигляд', 'Wróć do starego wyglądu', 'Back to the old look'); a.onclick = function (e) { e.preventDefault(); lsSet('ml_v5', '0'); location.reload(); }; f.appendChild(a); }
   try { ROUTE_LAST = null; } catch (e) {}
 })();
 
