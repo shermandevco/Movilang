@@ -466,6 +466,17 @@ function SupabaseBackend(url, key) {
 /* ================= init ================= */
 var cfg = window.MOVILANG_CONFIG || {};
 var API = (cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY && window.supabase) ? SupabaseBackend(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY) : DemoBackend();
+/* ---- kopia ciężkich danych w Cloudflare R2 (functions/l): lekcje i plakaty bez transferu Supabase ---- */
+if (API.mode === 'supabase' && API.sb) (function () {
+  function token() { return API.sb.auth.getSession().then(function (r) { return r && r.data && r.data.session ? r.data.session.access_token : null; }).catch(function () { return null; }); }
+  function cdn(path, method) { return token().then(function (tk) { return fetch('/l/x/' + path, {method:method || 'GET', headers:tk ? {Authorization:'Bearer ' + tk} : {}}).then(function (r) { if (!r.ok) throw new Error('cdn ' + r.status); return r.json(); }); }); }
+  var gl = API.getLesson, ll = API.listLessons, sl = API.saveLesson;
+  API.getLesson = function (id) { return cdn('lesson/' + id).catch(function () { return gl.call(API, id); }); };
+  API.listLessons = function (cid) { return cdn('course/' + cid).then(function (r) { if (!Array.isArray(r)) throw new Error('cdn'); return r; }).catch(function () { return ll.call(API, cid); }); };
+  API.saveLesson = function (l) { return sl.apply(API, arguments).then(function (res) { if (l && l.course_id) cdnPurge(l.course_id, l.id); return res; }); };
+  window.cdnPurge = function (cid, lid) { return cdn('course/' + cid + (lid ? '?lessons=' + lid : ''), 'DELETE').catch(function () {}); };
+})();
+function cdnPoster(u) { var m = String(u || '').match(/\/storage\/v1\/object\/public\/posters\/([A-Za-z0-9._-]+)$/); return m ? '/l/p/' + m[1] : u; }
 /* ---- read cache: makes navigation instant after the first load ---- */
 (function () {
   var C = {}, TTL = 5 * 60 * 1000, READS = {listCourses:1, getCourse:1, listLessons:1, getLesson:1, myEnrollments:1, myProgress:1, myLangs:1, getSettings:1, adminAnalytics:1, adminTimes:1};
@@ -604,7 +615,7 @@ function ownedTxt() { return tx({uk:'Активовано ✓', pl:'Aktywowano �
 })();
 function priceTxt(c) { if (c && OWNED[c.id]) return ownedTxt(); return isFreeCourse(c) ? tx({uk:'Безкоштовно', pl:'Za darmo', en:'Free'}) : (c.price || ''); }
 function posterHtml(c, small) {
-  var cls = POSTER_CLASSES.indexOf(c.poster) > -1 ? c.poster : 'p1', art = c.poster_url && /^https:\/\//.test(c.poster_url) ? c.poster_url.replace(/[()'"\s]/g, encodeURIComponent) : POSTER_ART.indexOf(c.slug) > -1 ? 'assets/posters/' + c.slug + '.svg?v=1' : '';
+  var cls = POSTER_CLASSES.indexOf(c.poster) > -1 ? c.poster : 'p1', art = c.poster_url && /^https:\/\//.test(c.poster_url) ? cdnPoster(c.poster_url).replace(/[()'"\s]/g, encodeURIComponent) : POSTER_ART.indexOf(c.slug) > -1 ? 'assets/posters/' + c.slug + '.svg?v=1' : '';
   return '<div class="poster ' + cls + (art ? ' art" style="background-image:linear-gradient(to top,#000c 0,#0006 30%,#0000 55%),url(' + art + ')' + (small ? ';width:120px;flex:0 0 120px;padding:10px' : '') + '"' : '"' + (small ? ' style="width:120px;flex:0 0 120px;padding:10px"' : '')) + '><span class="perf l"></span><span class="perf r"></span>' +
     (small ? '' : '<span class="tag">' + (c.kind === 'series' ? t('СЕРІАЛ') : t('ФІЛЬМ')) + ' · ' + esc(c.level) + '</span>' + (c.lessons_count ? (isFreeCourse(c) ? '<span class="tag new">' + tx({uk:'БЕЗКОШТОВНО', pl:'ZA DARMO', en:'FREE'}) + '</span>' : '') : t('<span class="tag new">СКОРО</span>'))) +
     '<div class="ptitle"' + (small ? ' style="font-size:14px"' : '') + '>' + esc(tr(c, 'title')) + '</div></div>';
@@ -3689,7 +3700,7 @@ if (/[?&]preview=1/.test(location.search)) document.documentElement.classList.ad
 
   /* головна шаблону 3 */
   function posterSrc(c) {
-    if (c.poster_url && /^https:\/\//.test(c.poster_url)) return c.poster_url;
+    if (c.poster_url && /^https:\/\//.test(c.poster_url)) return cdnPoster(c.poster_url);
     return POSTER_ART.indexOf(c.slug) > -1 ? 'assets/posters/' + c.slug + '.svg?v=1' : '';
   }
   function img(c, cls) { var s = posterSrc(c); return s ? '<img' + (cls ? ' class="' + cls + '"' : '') + ' src="' + esc(s) + '" alt="" loading="lazy">' : ''; }
@@ -4142,7 +4153,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEv
   function sync() { root.classList.toggle('kino', on()); try { if (on() && !localStorage.getItem('ml_theme') && THEME !== 'dark') { THEME = 'dark'; applyTheme(); } } catch (e) {} }
   sync();
   var _suK = setUI; setUI = function (v) { _suK(v); sync(); };
-  function pSrc(c) { if (!c) return ''; if (c.poster_url && /^https:\/\//.test(c.poster_url)) return c.poster_url; return POSTER_ART.indexOf(c.slug) > -1 ? 'assets/posters/' + c.slug + '.svg?v=1' : ''; }
+  function pSrc(c) { if (!c) return ''; if (c.poster_url && /^https:\/\//.test(c.poster_url)) return cdnPoster(c.poster_url); return POSTER_ART.indexOf(c.slug) > -1 ? 'assets/posters/' + c.slug + '.svg?v=1' : ''; }
   function svg(d, sz) { return '<svg viewBox="0 0 24 24" width="' + (sz || 18) + '" height="' + (sz || 18) + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; }
   var PLAY = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
 
@@ -4276,7 +4287,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEv
   var LVS = ['A1', 'A2', 'B1', 'B2', 'C1'];
 
   /* ---------- pomocnicze ---------- */
-  function src(c) { if (!c) return ''; if (c.poster_url && /^https:\/\//.test(c.poster_url)) return c.poster_url; return POSTER_ART.indexOf(c.slug) > -1 ? 'assets/posters/' + c.slug + '.svg?v=1' : ''; }
+  function src(c) { if (!c) return ''; if (c.poster_url && /^https:\/\//.test(c.poster_url)) return cdnPoster(c.poster_url); return POSTER_ART.indexOf(c.slug) > -1 ? 'assets/posters/' + c.slug + '.svg?v=1' : ''; }
   function pst(c, cls) { var s = src(c); return '<div class="x-pst ' + (cls || '') + '">' + (s ? '<img src="' + esc(s) + '" alt="" loading="lazy" decoding="async">' : '<span>' + esc(tr(c, 'title')) + '</span>') + '</div>'; }
   var SV = function (d, w) { return '<svg viewBox="0 0 24 24" width="' + (w || 20) + '" height="' + (w || 20) + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; };
   var IC = {
@@ -4510,6 +4521,16 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEv
     srsRows().then(function (rows) { var e = document.getElementById('xcWords'); if (e) { e.dataset.count = Object.keys(rows).length; count(e); } }).catch(function () {});
   }
 
+  /* admin: przycisk odświeżenia kopii lekcji w Cloudflare (po imporcie / masowej edycji) */
+  var _adm5 = viewAdmin;
+  viewAdmin = function () { return Promise.resolve(_adm5.apply(null, arguments)).then(function () {
+    if (!USER || USER.role !== 'admin' || !window.cdnPurge || document.getElementById('xCdn')) return;
+    var host = $app.querySelector('.sec-head') || $app.querySelector('.page'); if (!host) return;
+    var b = document.createElement('button'); b.type = 'button'; b.id = 'xCdn'; b.className = 'btn btn-ghost btn-sm'; b.textContent = '☁ ' + L('Оновити копію уроків', 'Odśwież kopię lekcji', 'Refresh lesson copy');
+    b.title = L('Після імпорту чи масових змін: учні отримають свіжі уроки з Cloudflare', 'Po imporcie lub masowych zmianach: uczniowie dostaną świeże lekcje z Cloudflare', 'After imports or bulk edits: students get fresh lessons from Cloudflare');
+    b.onclick = function () { b.disabled = true; API.listCourses(true).then(function (cs) { return Promise.all(cs.map(function (c) { return window.cdnPurge(c.id); })); }).then(function () { b.disabled = false; toast(L('Готово — копію оновлено', 'Gotowe — kopia odświeżona', 'Done — copy refreshed')); }, function () { b.disabled = false; }); };
+    host.appendChild(b);
+  }); };
   /* ---------- podpięcie widoków ---------- */
   var OLD_ONCE = false;
   var _home = viewHome, _cat = viewCatalog, _course = viewCourse, _cab = viewCabinet;
