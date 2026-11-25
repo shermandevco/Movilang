@@ -59,6 +59,7 @@ Deno.serve(async (req) => {
     f.set("line_items[0][price_data][unit_amount]", String(final));
     f.set("line_items[0][price_data][product_data][name]", name + (discount ? ` (−${discount}%)` : ""));
     f.set("line_items[0][price_data][product_data][tax_code]", "txcd_20060058");
+    f.set("line_items[0][price_data][tax_behavior]", "inclusive");
     f.set("metadata[user_id]", user.id);
     f.set("metadata[course_id]", courseId || "");
     f.set("metadata[bundle]", bundle ? "1" : "0");
