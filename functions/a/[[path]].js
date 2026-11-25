@@ -1,6 +1,6 @@
 // Audio clips stored in Cloudflare R2 (binding: AUDIO). GET = public playback, PUT = admin upload.
-const SB_URL = "https://pybzpbkmdupvtsmxlqvr.supabase.co";
-const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5YnpwYmttZHVwdnRzbXhscXZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2MjMxMjMsImV4cCI6MjEwNzE5OTEyM30.2pMZ-wHdsCXhLnkSH0t5DluePC4TInsCSeSf8vMz6w8";
+const SB_URL = "https://qbzrnvwijfupkthuvilg.supabase.co";
+const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFienJudndpamZ1cGt0aHV2aWxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1NTc5NzMsImV4cCI6MjExMTEzMzk3M30._-oigTYNXlDSUeDa6-l1PBoCyrjSr5_EMLXPe6cEfLQ";
 const OK_PATH = /^g\/(en|pl|uk)\/[0-9a-f]{16}\.wav$/;
 
 async function isAdmin(req) {

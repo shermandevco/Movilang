@@ -10,5 +10,5 @@ jobs:
     steps:
       - name: Run mailer
         run: |
-          curl -fsS -X POST "https://pybzpbkmdupvtsmxlqvr.supabase.co/functions/v1/mailer" \
+          curl -fsS -X POST "https://qbzrnvwijfupkthuvilg.supabase.co/functions/v1/mailer" \
             -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" -H "Content-Type: application/json" -d '{}'

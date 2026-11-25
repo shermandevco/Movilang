@@ -7,6 +7,6 @@ window.MOVILANG_SITE = {
   REDIRECT_FROM: ["movielang.pages.dev"]                     // старі адреси, з яких автоматично перекидати на URL
 };
 window.MOVILANG_CONFIG = {
-  SUPABASE_URL: "https://pybzpbkmdupvtsmxlqvr.supabase.co",       // напр. "https://abcdefgh.supabase.co"
-  SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5YnpwYmttZHVwdnRzbXhscXZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2MjMxMjMsImV4cCI6MjEwNzE5OTEyM30.2pMZ-wHdsCXhLnkSH0t5DluePC4TInsCSeSf8vMz6w8"   // Project Settings → API → anon public key
+  SUPABASE_URL: "https://qbzrnvwijfupkthuvilg.supabase.co",       // напр. "https://abcdefgh.supabase.co"
+  SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFienJudndpamZ1cGt0aHV2aWxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1NTc5NzMsImV4cCI6MjExMTEzMzk3M30._-oigTYNXlDSUeDa6-l1PBoCyrjSr5_EMLXPe6cEfLQ"   // Project Settings → API → anon public key
 };
