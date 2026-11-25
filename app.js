@@ -617,7 +617,7 @@ function ownedTxt() { return tx({uk:'Активовано ✓', pl:'Aktywowano �
 })();
 function priceTxt(c) { if (c && OWNED[c.id]) return ownedTxt(); return isFreeCourse(c) ? tx({uk:'Безкоштовно', pl:'Za darmo', en:'Free'}) : (c.price || ''); }
 function posterHtml(c, small) {
-  var cls = POSTER_CLASSES.indexOf(c.poster) > -1 ? c.poster : 'p1', art = c.poster_url && /^https:\/\//.test(c.poster_url) ? cdnPoster(c.poster_url).replace(/[()'"\s]/g, encodeURIComponent) : POSTER_ART.indexOf(c.slug) > -1 ? 'assets/posters/' + c.slug + '.svg?v=1' : '';
+  var cls = POSTER_CLASSES.indexOf(c.poster) > -1 ? c.poster : 'p1', art = c.poster_url && /^https:\/\//.test(c.poster_url) ? cdnPoster(c.poster_url).replace(/[()'"\s]/g, encodeURIComponent) : POSTER_ART.indexOf(c.slug) > -1 ? 'assets/posters/' + c.slug + '.svg?v=2' : '';
   return '<div class="poster ' + cls + (art ? ' art" style="background-image:linear-gradient(to top,#000c 0,#0006 30%,#0000 55%),url(' + art + ')' + (small ? ';width:120px;flex:0 0 120px;padding:10px' : '') + '"' : '"' + (small ? ' style="width:120px;flex:0 0 120px;padding:10px"' : '')) + '><span class="perf l"></span><span class="perf r"></span>' +
     (small ? '' : '<span class="tag">' + (c.kind === 'series' ? t('СЕРІАЛ') : t('ФІЛЬМ')) + ' · ' + esc(c.level) + '</span>' + (c.lessons_count ? (isFreeCourse(c) ? '<span class="tag new">' + tx({uk:'БЕЗКОШТОВНО', pl:'ZA DARMO', en:'FREE'}) + '</span>' : '') : t('<span class="tag new">СКОРО</span>'))) +
     '<div class="ptitle"' + (small ? ' style="font-size:14px"' : '') + '>' + esc(tr(c, 'title')) + '</div></div>';
@@ -3703,7 +3703,7 @@ if (/[?&]preview=1/.test(location.search)) document.documentElement.classList.ad
   /* головна шаблону 3 */
   function posterSrc(c) {
     if (c.poster_url && /^https:\/\//.test(c.poster_url)) return cdnPoster(c.poster_url);
-    return POSTER_ART.indexOf(c.slug) > -1 ? 'assets/posters/' + c.slug + '.svg?v=1' : '';
+    return POSTER_ART.indexOf(c.slug) > -1 ? 'assets/posters/' + c.slug + '.svg?v=2' : '';
   }
   function img(c, cls) { var s = posterSrc(c); return s ? '<img' + (cls ? ' class="' + cls + '"' : '') + ' src="' + esc(s) + '" alt="" loading="lazy">' : ''; }
   var LV = 'all';
@@ -4155,7 +4155,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEv
   function sync() { root.classList.toggle('kino', on()); try { if (on() && !localStorage.getItem('ml_theme') && THEME !== 'dark') { THEME = 'dark'; applyTheme(); } } catch (e) {} }
   sync();
   var _suK = setUI; setUI = function (v) { _suK(v); sync(); };
-  function pSrc(c) { if (!c) return ''; if (c.poster_url && /^https:\/\//.test(c.poster_url)) return cdnPoster(c.poster_url); return POSTER_ART.indexOf(c.slug) > -1 ? 'assets/posters/' + c.slug + '.svg?v=1' : ''; }
+  function pSrc(c) { if (!c) return ''; if (c.poster_url && /^https:\/\//.test(c.poster_url)) return cdnPoster(c.poster_url); return POSTER_ART.indexOf(c.slug) > -1 ? 'assets/posters/' + c.slug + '.svg?v=2' : ''; }
   function svg(d, sz) { return '<svg viewBox="0 0 24 24" width="' + (sz || 18) + '" height="' + (sz || 18) + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; }
   var PLAY = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
 
@@ -4289,7 +4289,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEv
   var LVS = ['A1', 'A2', 'B1', 'B2', 'C1'];
 
   /* ---------- pomocnicze ---------- */
-  function src(c) { if (!c) return ''; if (c.poster_url && /^https:\/\//.test(c.poster_url)) return cdnPoster(c.poster_url); return POSTER_ART.indexOf(c.slug) > -1 ? 'assets/posters/' + c.slug + '.svg?v=1' : ''; }
+  function src(c) { if (!c) return ''; if (c.poster_url && /^https:\/\//.test(c.poster_url)) return cdnPoster(c.poster_url); return POSTER_ART.indexOf(c.slug) > -1 ? 'assets/posters/' + c.slug + '.svg?v=2' : ''; }
   function pst(c, cls) { var s = src(c); return '<div class="x-pst ' + (cls || '') + '">' + (s ? '<img src="' + esc(s) + '" alt="" loading="lazy" decoding="async">' : '<span>' + esc(tr(c, 'title')) + '</span>') + '</div>'; }
   var SV = function (d, w) { return '<svg viewBox="0 0 24 24" width="' + (w || 20) + '" height="' + (w || 20) + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; };
   var IC = {
