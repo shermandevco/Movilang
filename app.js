@@ -25,7 +25,9 @@ var TTS_OK = false, TTS_URLS = {}, TTS_AUDIO = null, TTS_SET = null;
 function ttsClean(t) { return String(t || '').replace(/<[^>]+>/g, '').replace(/_{2,}/g, '…').replace(/\s+/g, ' ').trim(); }
 function ttsHash(str) { var h1 = 0xdeadbeef, h2 = 0x41c6ce57; for (var i = 0, ch; i < str.length; i++) { ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); } h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909); h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909); return (h2 >>> 0).toString(16).padStart(8, '0') + (h1 >>> 0).toString(16).padStart(8, '0'); }
 function ttsPath(code, clean) { return 'g/' + code + '/' + ttsHash(code + '|v3|' + clean) + '.wav'; }
-function loadTtsSet() { if (!API.ttsList) return; API.ttsList().then(function (ps) { TTS_SET = {}; ps.forEach(function (p) { TTS_SET[p] = 1; }); }).catch(function () {}); }
+/* Wszystkie lekcje (admin) z kopii w Cloudflare R2 zamiast z Supabase — oszczędza limit transferu. */
+function allLessonsCdn() { return API.listCourses(true).then(function (cs) { return Promise.all(cs.map(function (c) { return API.listLessons(c.id).catch(function () { return []; }); })); }).then(function (a) { return [].concat.apply([], a).sort(function (x, y) { return x.num - y.num; }); }); }
+function loadTtsSet() { if (!API.ttsList) return; var c = lsGet('ml_tts_set', null); if (c && c.t > Date.now() - 12 * 3600e3 && Array.isArray(c.p)) { TTS_SET = {}; c.p.forEach(function (p) { TTS_SET[p] = 1; }); return; } API.ttsList().then(function (ps) { TTS_SET = {}; ps.forEach(function (p) { TTS_SET[p] = 1; }); lsSet('ml_tts_set', {t:Date.now(), p:ps}); }).catch(function () {}); }
 var SAY_LAST = {k:'', t:0};
 function playClip(cl, lg) {
   var cd = lg.slice(0, 2), C0 = window.MOVILANG_CONFIG || {}, pth = cl && ttsPath(cd, cl);
@@ -434,7 +436,7 @@ function SupabaseBackend(url, key) {
     myLangs: function () { return waitU().then(function () { if (!cachedUser) return []; return sb.from('enrollment_langs').select('*').eq('user_id', cachedUser.id).then(ok); }); },
     addLang: function (cid, tg, hidden) { return sb.from('enrollment_langs').upsert({user_id:cachedUser.id, course_id:cid, target:tg, hidden:!!hidden}).then(ok); },
     saveTimes: function (lessonId, score, tm) { if (!cachedUser) return Promise.resolve(false); return sb.from('task_times').insert({user_id:cachedUser.id, lesson_id:lessonId, target:TARGET, score:score, total_sec:tm.total, per_task:tm.per}).then(ok); },
-    adminAnalytics: function () { return Promise.all([sb.from('courses').select('*'), sb.from('lessons').select('*').order('num'), sb.from('progress').select('*'), sb.from('progress_lang').select('*'), sb.from('task_times').select('*').limit(5000), sb.from('enrollment_langs').select('*')]).then(function (r) { r.forEach(ok); return {courses:r[0].data, lessons:r[1].data, progress:r[2].data, progress_lang:r[3].data, times:r[4].data, elangs:r[5].data}; }); },
+    adminAnalytics: function () { return Promise.all([sb.from('courses').select('*'), allLessonsCdn().then(function (d) { return {data:d}; }), sb.from('progress').select('*'), sb.from('progress_lang').select('*'), sb.from('task_times').select('*').limit(5000), sb.from('enrollment_langs').select('*')]).then(function (r) { r.forEach(ok); return {courses:r[0].data, lessons:r[1].data, progress:r[2].data, progress_lang:r[3].data, times:r[4].data, elangs:r[5].data}; }); },
     adminUser: function (uid) { return Promise.all([sb.from('profiles').select('*').eq('id', uid).maybeSingle(), sb.from('task_times').select('*').eq('user_id', uid).order('created_at', {ascending:false}).limit(2000), sb.from('progress').select('*').eq('user_id', uid), sb.from('progress_lang').select('*').eq('user_id', uid), sb.from('lessons').select('id,num,title,title_pl,title_en,course_id'), sb.from('courses').select('id,title,title_pl,title_en')]).then(function (r) { r.forEach(ok); return {user:r[0].data, times:r[1].data || [], progress:r[2].data || [], progress_lang:r[3].data || [], lessons:r[4].data || [], courses:r[5].data || []}; }); },
     adminTimes: function () { return Promise.all([sb.from('task_times').select('*').order('created_at', {ascending:false}).limit(300), sb.from('profiles').select('id,name,email'), sb.from('lessons').select('id,num,title,title_pl,title_en,course_id')]).then(function (r) { r.forEach(ok); return {times:r[0].data, users:r[1].data, lessons:r[2].data}; }); },
     adminSetProgress: function (lessonIds, tg, score) { var uid = cachedUser.id, now = new Date().toISOString(); var rows = lessonIds.map(function (lid) { var x = {user_id:uid, lesson_id:lid, score:score, retry_score:null, completed_at:now}; if (tg !== 'en') x.target = tg; return x; }); return sb.from(tg === 'en' ? 'progress' : 'progress_lang').upsert(rows).then(ok); },
@@ -2973,7 +2975,7 @@ function stdImportPanel(host, lessonIds) {
 
 function admCheck(body) {
   if (needSb(body)) return Promise.resolve();
-  if (!window.CHK_CACHE || Date.now() - window.CHK_CACHE.t > 5 * 60 * 1000) window.CHK_CACHE = {t:Date.now(), p:q(SB().from('lessons').select('id,num,course_id,title,title_pl,title_en,scene,scene_pl,scene_en,grammar,tasks,variants'))};
+  if (!window.CHK_CACHE || Date.now() - window.CHK_CACHE.t > 5 * 60 * 1000) window.CHK_CACHE = {t:Date.now(), p:allLessonsCdn()};
   return Promise.all([API.listCourses(true), window.CHK_CACHE.p]).then(function (r) {
     var cs = r[0], ls = r[1] || []; if (!CHK_C) CHK_C = 'all'; var ALL = CHK_C === 'all', cn = {}; cs.forEach(function (c) { cn[c.id] = tr(c, 'title'); });
     var cl = ls.filter(function (l) { return ALL || l.course_id === CHK_C; }).sort(function (a, b) { return (a.course_id === b.course_id ? 0 : (cn[a.course_id] || '') < (cn[b.course_id] || '') ? -1 : 1) || a.num - b.num; });
@@ -3638,7 +3640,7 @@ if (/[?&]preview=1/.test(location.search)) document.documentElement.classList.ad
   function background() {
     if (!LANG_SET) langModal(true);
     setTimeout(function () { API.prefetch(); }, 300);
-    setTimeout(processPendingWritings, 4000); setTimeout(processReplies, 9000); setInterval(processReplies, 4 * 60 * 1000); setTimeout(loadTtsSet, 1500); setInterval(processPendingWritings, 5 * 60 * 1000);
+    setTimeout(processPendingWritings, 4000); setTimeout(processReplies, 9000); setInterval(function () { if (!document.hidden) processReplies(); }, 15 * 60 * 1000); setTimeout(loadTtsSet, 1500); setInterval(function () { if (!document.hidden) processPendingWritings(); }, 15 * 60 * 1000);
     var idle = window.requestIdleCallback || function (f) { return setTimeout(f, 1800); }; idle(function () { loadJournals(); });
   }
   /* mikrozadanie: reszta app.js (szablon 3, FX) musi się najpierw wykonać i podmienić widoki */
