@@ -4538,6 +4538,20 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEv
   var _home = viewHome, _cat = viewCatalog, _course = viewCourse, _cab = viewCabinet;
   viewHome = function () { return USER ? viewDashX() : viewHomeX(); };
   viewCatalog = function () { return viewCatalogX(); };
+  /* cennik: aktualne ceny (kurs + pakiet), płatność przez Stripe */
+  viewPricing = function () {
+    return API.listCourses(false).then(function (courses) {
+      var bundle = (SETTINGS && SETTINGS.bundle_price) || '149 zł';
+      var paid = courses.filter(function (c) { return !isFreeCourse(c); });
+      var one = (paid[0] || {}).price || '49 zł';
+      $app.innerHTML = '<div class="x"><section class="x-sec" id="pricing"><div class="x-head"><div><span class="x-k">' + L('Ціни', 'Cennik', 'Pricing') + '</span><h2 class="x-h2">' + L('Платиш один раз. Назавжди.', 'Płacisz raz. Na zawsze.', 'Pay once. Keep it forever.') + '</h2></div></div><div class="x-plans">' +
+        '<div class="x-plan" data-r data-tilt><span class="x-k">' + L('Один курс', 'Jeden kurs', 'One course') + '</span><div class="x-price">' + esc(one) + '</div><ul><li>' + IC.check + L('Усі уроки курсу', 'Wszystkie lekcje kursu', 'Every lesson in the course') + '</li><li>' + IC.check + L('Перший урок безкоштовно', 'Pierwsza lekcja za darmo', 'First lesson free') + '</li><li>' + IC.check + L('Сертифікат', 'Certyfikat', 'Certificate') + '</li><li>' + IC.check + L('Доступ назавжди', 'Dostęp na zawsze', 'Lifetime access') + '</li></ul><a class="x-btn x-btn-g" href="#/catalog">' + L('Обрати курс', 'Wybierz kurs', 'Choose a course') + '</a></div>' +
+        '<div class="x-plan hot" data-r data-tilt style="--d:120ms"><span class="x-badge">' + L('Найвигідніше', 'Najkorzystniej', 'Best value') + '</span><span class="x-k">' + L('Усі курси', 'Wszystkie kursy', 'All courses') + '</span><div class="x-price">' + esc(bundle) + '</div><ul><li>' + IC.check + courses.length + ' ' + L('курсів + нові прем’єри', 'kursów + nowe premiery', 'courses + new releases') + '</li><li>' + IC.check + L('Англійська, польська, українська', 'Angielski, polski, ukraiński', 'English, Polish, Ukrainian') + '</li><li>' + IC.check + L('Без підписки', 'Bez subskrypcji', 'No subscription') + '</li></ul><button type="button" class="x-btn x-btn-a" data-buy-bundle>' + L('Купити пакет', 'Kup pakiet', 'Buy the bundle') + '</button></div>' +
+        '</div><p class="x-pay">BLIK · Przelewy24 · ' + L('картка', 'karta', 'card') + ' · <a href="#/gift">' + L('Подарувати курс', 'Podaruj kurs', 'Gift a course') + '</a></p></section>' +
+        '<section class="x-sec x-faq">' + (typeof faqHtml === 'function' ? faqHtml() : '') + '</section></div>';
+      life($app);
+    });
+  };
   viewCourse = function (id) { if (OLD_ONCE) { OLD_ONCE = false; return _course(id); } return viewCourseX(id); };
   viewCabinet = function () { return Promise.resolve(_cab()).then(function () { try { cabHero(); } catch (e) {} }); };
   /* inne strony: tylko animacja pojawiania */
