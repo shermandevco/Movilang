@@ -71,3 +71,6 @@
   html.fx-focus .tnav:has(#tnext) .askb{white-space:nowrap}
   html.fx-focus footer{display:none}
 }
+
+/* świece i dekoracje kursu pod treścią lekcji */
+body.has-amb #app{position:relative}

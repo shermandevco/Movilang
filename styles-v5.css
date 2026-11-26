@@ -463,3 +463,6 @@ html[data-v5] .x-cta-note{margin:14px 0 0;font-size:14px;color:var(--x-mu)}
   html[data-v5] .x-step-scr .x-scr-mic{padding:8px 0}
 }
 @media (max-width:640px){html[data-v5] .x-hero-in{padding-bottom:24px}}
+
+/* pulpit bez rozpoczętego kursu: tekst na całą szerokość karty */
+html[data-v5] .x-next-c.x-next-empty{grid-template-columns:minmax(0,1fr) auto!important;padding:20px}
