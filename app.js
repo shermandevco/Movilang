@@ -1522,6 +1522,25 @@ function runPlayer(container, lesson, onFinish, ctxLs) {
       if (FREE && cur < tasks.length - 1) { var nbq = card.querySelector('#tnext'); nbq.hidden = false; nbq.textContent = '⏭ ' + tx({uk:'Пропустити (адмін)', pl:'Pomiń (admin)', en:'Skip (admin)'}); nbq.onclick = function () { cur++; render(); }; }
       qstep(tk.start || Object.keys(steps)[0]); return;
     }
+    if (type === 'rtext') {
+      /* długi tekst B2+: akapity, słowa kluczowe, pytania na zrozumienie */
+      var rq = tk.items || [];
+      h = h.replace('<div class="tq', '<div class="tins">' + tx({uk:'Прочитай текст і дай відповіді на запитання', pl:'Przeczytaj tekst i odpowiedz na pytania', en:'Read the text and answer the questions'}) + '</div><div class="tq');
+      h += (lf(tk, 'title') ? '<h4 class="rtitle">' + esc(lf(tk, 'title')) + '</h4>' : '') +
+        '<div class="rtext rlong">' + String(tk.text || '').split(/\n\n+/).map(function (pp) { return '<p>' + esc(pp) + '</p>'; }).join('') + '</div>' +
+        ((tk.words || []).length ? '<div class="rwords"><b>' + tx({uk:'Ключові слова', pl:'Słowa kluczowe', en:'Key words'}) + ':</b> ' + tk.words.map(function (w) { return '<span class="rw"><b>' + esc(w.w) + '</b> — ' + esc(w.d) + '</span>'; }).join(' · ') + '</div>' : '') +
+        '<ol class="rqs">' + rq.map(function (it, k) { return '<li><div class="rq">' + esc(it.q) + '</div><select class="rsel" data-k="' + k + '"><option value="">…</option>' + it.options.map(function (o, j) { return '<option value="' + j + '">' + esc(o) + '</option>'; }).join('') + '</select></li>'; }).join('') + '</ol>' +
+        '<div class="row"><button class="btn btn-red" type="button" id="rcheck">' + t('Перевірити') + '</button></div>';
+      h += foot(); card.innerHTML = h; bindSay(tk);
+      card.querySelector('#rcheck').onclick = function () {
+        var sels = card.querySelectorAll('.rsel'), good = 0;
+        if ([].some.call(sels, function (x) { return x.value === ''; })) { var fb0 = card.querySelector('#tfb'); fb0.className = 'tfb err'; fb0.textContent = tx({uk:'Дай відповідь на всі запитання.', pl:'Odpowiedz na wszystkie pytania.', en:'Answer all the questions.'}); return; }
+        sels.forEach(function (x) { var it = rq[+x.dataset.k], ok = +x.value === it.answer; if (ok) good++; x.classList.add(ok ? 'right' : 'wrong'); if (!ok) x.insertAdjacentHTML('afterend', '<span class="rfix">' + esc(it.options[it.answer]) + '</span>'); x.disabled = true; });
+        var nq = sels.length, ok = good >= Math.ceil(nq * 0.67); this.disabled = true;
+        done(ok, (ok ? t('Правильно! ') : t('Майже. ')) + good + ' / ' + nq);
+      };
+      return;
+    }
     if (type === 'reading') {
       var its = tk.items || [];
       h = h.replace('<div class="tq', '<div class="tins">' + tx({uk:'Прочитай текст і обери правильні форми', pl:'Przeczytaj tekst i wybierz poprawne formy', en:'Read the text and choose the correct forms'}) + '</div><div class="tq');
