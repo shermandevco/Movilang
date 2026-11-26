@@ -564,28 +564,53 @@ function renderMobileNav() {
         (adm ? sw('msAdm', !!ADMIN_MODE, L('Режим адміна', 'Tryb admina', 'Admin mode'), ic('#EEE8F5', '#5C5470', P.gear)) + link('#/admin', ic('#EEE8F5', '#5C5470', P.tool), L('Адмін-панель', 'Panel admina', 'Admin panel'), '<span class="ms-tag">admin</span>') : '') + '</div>' +
       (USER ? '<button type="button" class="ms-out" id="msOut">' + L('Вийти', 'Wyloguj', 'Log out') + '</button>' : '') + '</div>');
     w.classList.add('msheetw');
-    /* жести шторки: тягни вгору — розгорнути, вниз — згорнути/закрити */
-    (function () { var box = w.querySelector('.lbox'), grip = w.querySelector('.ms-grip'), y0 = null, dy = 0, h0 = 0, fromGrip = false;
-      var vh = function () { return window.innerHeight; }, HALF = function () { return Math.round(vh() * 0.62); }, FULL = function () { return Math.round(vh() * 0.94); };
-      var full = false;
-      var setH = function (px, anim) { box.style.transition = anim ? 'height .25s cubic-bezier(.2,.8,.2,1), transform .2s ease' : 'none'; box.style.height = px + 'px'; box.style.maxHeight = 'none'; };
-      if (box.scrollHeight > HALF() + 40) setH(HALF(), false);
-      var BASE = Math.round(box.getBoundingClientRect().height); HALF = function () { return BASE; };
-      var close = function () { box.style.transition = 'transform .2s ease'; box.style.transform = 'translateY(100%)'; setTimeout(function () { w.remove(); }, 180); };
-      var start = function (y, g) { fromGrip = g; if (!g && box.scrollTop > 0) { y0 = null; return; } y0 = y; dy = 0; h0 = box.getBoundingClientRect().height; box.style.transition = 'none'; };
-      var move = function (y, e) { if (y0 == null) return; dy = y - y0;
-        if (dy < 0) { if (full && !fromGrip) { y0 = null; return; } box.style.transform = ''; setH(Math.min(FULL(), h0 - dy), false); if (e && e.cancelable) e.preventDefault(); }
-        else if (dy > 0) { if (full && h0 - dy > HALF()) setH(h0 - dy, false); else box.style.transform = 'translateY(' + (dy - (full ? h0 - HALF() : 0)) + 'px)'; if (e && e.cancelable) e.preventDefault(); } };
-      var end = function () { if (y0 == null) return; y0 = null;
-        if (dy < -50) { full = true; box.style.transform = ''; setH(FULL(), true); }
-        else if (dy > 60 && full && dy < (h0 - HALF()) + 90) { full = false; box.style.transform = ''; setH(HALF(), true); }
-        else if (dy > 90) close();
-        else { box.style.transition = 'transform .2s ease, height .25s ease'; box.style.transform = ''; if (box.style.height) setH(full ? FULL() : HALF(), true); } };
-      box.addEventListener('touchstart', function (e) { start(e.touches[0].clientY, !!e.target.closest('.ms-grip')); }, {passive:true});
-      box.addEventListener('touchmove', function (e) { move(e.touches[0].clientY, e); }, {passive:false});
-      box.addEventListener('touchend', end);
+    /* жести шторки: transform-only, за пальцем 1:1, інерція і пружний доводчик */
+    (function () { var box = w.querySelector('.lbox'), grip = w.querySelector('.ms-grip');
+      var natural = box.scrollHeight, VH = window.innerHeight, FULL = Math.round(VH * 0.94);
+      var HALFH = Math.min(natural, Math.round(VH * 0.62)), OFF = FULL - HALFH;
+      var pos = FULL, state = 'half', raf = 0, pend = null, drag = null;
+      box.style.cssText += ';animation:none;height:' + FULL + 'px;max-height:none;will-change:transform;overscroll-behavior:contain;';
+      var EASE = 'transform .42s cubic-bezier(.22,1,.36,1)';
+      var apply = function () { raf = 0; if (pend != null) { box.style.transform = 'translate3d(0,' + pend + 'px,0)'; pend = null; } };
+      var setPos = function (y, anim, dur) { pos = y; box.style.transition = anim ? (dur ? 'transform ' + dur + 's cubic-bezier(.22,1,.36,1)' : EASE) : 'none';
+        if (anim) { if (raf) { cancelAnimationFrame(raf); raf = 0; } pend = null; box.style.transform = 'translate3d(0,' + y + 'px,0)'; } else { pend = y; if (!raf) raf = requestAnimationFrame(apply); }
+        w.style.backgroundColor = ''; w.style.opacity = ''; };
+      var setState = function (st, dur) { state = st; box.style.overflowY = st === 'full' ? 'auto' : 'hidden';
+        if (st === 'closed') { setPos(FULL + 20, true, dur || .3); w.style.transition = 'opacity .3s ease'; w.style.opacity = '0'; setTimeout(function () { w.remove(); }, (dur || .3) * 1000); return; }
+        setPos(st === 'full' ? 0 : OFF, true, dur); };
+      /* старт: виїзд знизу */
+      box.style.overflowY = 'hidden'; box.style.transform = 'translate3d(0,' + FULL + 'px,0)'; box.getBoundingClientRect();
+      requestAnimationFrame(function () { setState('half'); });
+      w.onclick = function (e) { if (e.target === w) setState('closed'); };
+      var startDrag = function (y, onGrip) {
+        if (state === 'full' && !onGrip && box.scrollTop > 0) { drag = null; return; }
+        var m = getComputedStyle(box).transform, cur = pos; if (m && m !== 'none') { cur = +m.split(',')[5].replace(')', ''); }
+        box.style.transition = 'none'; box.style.transform = 'translate3d(0,' + cur + 'px,0)'; pos = cur;
+        drag = {y0: y, p0: cur, grip: onGrip, s: [{y: y, t: performance.now()}], dec: false}; };
+      var moveDrag = function (y, e) { if (!drag) return; var dy = y - drag.y0;
+        if (!drag.dec) { if (Math.abs(dy) < 4) return; drag.dec = true;
+          if (state === 'full' && !drag.grip && dy < 0) { drag = null; return; } }
+        if (e && e.cancelable) e.preventDefault();
+        var p = drag.p0 + dy; if (p < 0) p = -Math.pow(-p, 0.7);
+        setPos(p, false); var now = performance.now(); drag.s.push({y: y, t: now}); if (drag.s.length > 5) drag.s.shift(); };
+      var endDrag = function () { if (!drag) return; var d = drag; drag = null; if (!d.dec) return;
+        var a = d.s[0], z = d.s[d.s.length - 1], v = (z.t - a.t) > 0 ? (z.y - a.y) / (z.t - a.t) : 0; /* px/ms, + вниз */
+        var proj = pos + v * 180, target;
+        if (v > 0.6) target = pos < OFF - 10 && state === 'full' ? 'half' : 'closed';
+        else if (v < -0.6) target = 'full';
+        else target = proj < OFF / 2 ? 'full' : proj < OFF + (FULL - OFF) * 0.45 ? 'half' : 'closed';
+        if (target === 'half' && OFF < 8) target = proj > FULL * 0.35 ? 'closed' : 'full';
+        var dist = Math.abs((target === 'full' ? 0 : target === 'half' ? OFF : FULL) - pos), sp = Math.max(Math.abs(v), 1.2);
+        setState(target, Math.min(.45, Math.max(.22, dist / sp / 1000 * 2.2))); };
+      box.addEventListener('touchstart', function (e) { startDrag(e.touches[0].clientY, !!e.target.closest('.ms-grip')); }, {passive: true});
+      box.addEventListener('touchmove', function (e) { moveDrag(e.touches[0].clientY, e); }, {passive: false});
+      box.addEventListener('touchend', endDrag); box.addEventListener('touchcancel', endDrag);
       if (grip) { grip.setAttribute('role', 'button'); grip.setAttribute('aria-label', L('Розгорнути', 'Rozwiń', 'Expand'));
-        grip.addEventListener('mousedown', function (e) { start(e.clientY, true); var mm = function (ev) { move(ev.clientY); }, mu = function () { document.removeEventListener('mousemove', mm); document.removeEventListener('mouseup', mu); if (Math.abs(dy) < 5) { full = !full; setH(full ? FULL() : HALF(), true); y0 = null; return; } end(); }; document.addEventListener('mousemove', mm); document.addEventListener('mouseup', mu); }); }
+        grip.addEventListener('mousedown', function (e) { e.preventDefault(); startDrag(e.clientY, true);
+          var mm = function (ev) { moveDrag(ev.clientY); }, mu = function () { document.removeEventListener('mousemove', mm); document.removeEventListener('mouseup', mu);
+            if (drag && !drag.dec) { drag = null; setState(state === 'full' ? 'half' : 'full'); return; } endDrag(); };
+          document.addEventListener('mousemove', mm); document.addEventListener('mouseup', mu); }); }
+      w._closeSheet = function () { setState('closed'); };
     })();
     if (USER) try { fillContinue(); } catch (e) {}
     w.addEventListener('click', function (e) { if (e.target.closest('a')) w.remove(); });
