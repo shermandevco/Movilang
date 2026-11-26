@@ -1230,7 +1230,7 @@ html[data-course] #app{--red:var(--fx-course);--coral:var(--fx-course);--link:va
 .ch-grp .ch-gn{display:inline-block;min-width:20px;margin-left:6px;padding:0 6px;border-radius:999px;background:var(--panel);color:var(--muted);font-size:12px;text-align:center}
 /* menu „Więcej” na telefonie — wariant A (grupy, przełączniki) */
 .ms2{gap:0!important;color:var(--fg)}
-.ms2 .ms-grip{align-self:center;width:40px;height:5px;border-radius:5px;background:var(--line);margin:0 0 12px}
+.ms2 .ms-grip{align-self:center;width:40px;height:5px;cursor:grab;touch-action:none;box-shadow:0 0 0 12px transparent;border-radius:5px;background:var(--line);margin:0 0 12px}
 .ms2 .ms-prof{background:#1B1233;color:#fff;border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px;margin-bottom:6px}
 .ms2 .ms-top{display:flex;align-items:center;gap:12px}
 .ms2 .ms-ava{flex:0 0 44px;height:44px;border-radius:50%;background:#FF7A59;color:#1B1233;font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:center}
