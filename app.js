@@ -567,7 +567,7 @@ function renderMobileNav() {
     /* жести шторки: transform-only, за пальцем 1:1, інерція і пружний доводчик */
     (function () { var box = w.querySelector('.lbox'), grip = w.querySelector('.ms-grip');
       var natural = box.scrollHeight, VH = window.innerHeight, FULL = Math.round(VH * 0.94);
-      var HALFH = Math.min(natural, Math.round(VH * 0.62)), OFF = FULL - HALFH;
+      var HALFH = Math.min(natural, FULL), OFF = FULL - HALFH;
       var pos = FULL, state = 'half', raf = 0, pend = null, drag = null;
       box.style.cssText += ';animation:none;height:' + FULL + 'px;max-height:none;will-change:transform;overscroll-behavior:contain;';
       var EASE = 'transform .42s cubic-bezier(.22,1,.36,1)';
@@ -596,7 +596,7 @@ function renderMobileNav() {
       var endDrag = function () { if (!drag) return; var d = drag; drag = null; if (!d.dec) return;
         var a = d.s[0], z = d.s[d.s.length - 1], v = (z.t - a.t) > 0 ? (z.y - a.y) / (z.t - a.t) : 0; /* px/ms, + вниз */
         var proj = pos + v * 180, target;
-        if (v > 0.6) target = pos < OFF - 10 && state === 'full' ? 'half' : 'closed';
+        if (v > 0.6) target = state === 'full' && OFF >= 8 && pos < OFF + 60 ? 'half' : 'closed';
         else if (v < -0.6) target = 'full';
         else target = proj < OFF / 2 ? 'full' : proj < OFF + (FULL - OFF) * 0.45 ? 'half' : 'closed';
         if (target === 'half' && OFF < 8) target = proj > FULL * 0.35 ? 'closed' : 'full';
