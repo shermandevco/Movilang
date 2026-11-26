@@ -121,30 +121,30 @@
     pl: 'Jessica poprosiła mnie, żebym napisał{|a} prawdę o nocy upadku — dla Paula. Przeczytał to przez moje ramię i powiedział „dziękuję”. Potem weszła Kynes, blada: „Sardaukarzy nas znaleźli. Macie godzinę”.',
     uk: 'Джессіка попросила мене написати правду про ніч падіння — для Пола. Він прочитав через моє плече й сказав «дякую». Потім увійшла Кайнс, бліда: «Сардаукари знайшли нас. У вас є година».'
   },
-  25: {
+  27: {
     en: 'If Duncan hadn\'t stayed in that [[corridor]], they would have caught us. He stood alone against nineteen. The engine started on the third try. If it hadn\'t been for Duncan, none of us would be alive.',
     pl: 'Gdyby Duncan nie został na tamtym korytarzu, złapaliby nas. Stał sam przeciw dziewiętnastu. Silnik zapalił za trzecią próbą. Gdyby nie Duncan, nikt z nas by nie żył.',
     uk: 'Якби Дункан не залишився в тому коридорі, нас би схопили. Він стояв сам проти дев\'ятнадцяти. Двигун завівся з третьої спроби. Якби не Дункан, ніхто з нас не був би живий.'
   },
-  26: {
-    en: 'Jessica flew us straight into the [[storm]]. Paul whispered the [[litany]]: “Fear is the mind-killer.” We came down alive on a dune. I wish I had thanked Duncan. If only my maps were better.',
-    pl: 'Jessica wleciała z nami prosto w burzę. Paul szeptał litanię: „Strach zabija umysł”. Spadliśmy żywi na wydmę. Szkoda, że nie podziękował{em|am} Duncanowi. Gdyby tylko moje mapy były lepsze.',
-    uk: 'Джессіка повела нас просто в бурю. Пол шепотів літанію: «Страх — убивця розуму». Ми живими впали на дюну. Шкода, що я не подякува{в|ла} Дунканові. Якби ж мої мапи були кращими.'
-  },
-  27: {
-    en: 'At dawn we saw the Sardaukar make Kynes walk into the desert without water. She drove a [[thumper]] into the sand and sang. She didn\'t let them decide how she would die. Paul didn\'t let me go down.',
-    pl: 'O świcie zobaczyliśmy, jak sardaukarzy zmusili Kynes do marszu na pustynię bez wody. Wbiła w piasek ubijacz i zaczęła śpiewać. Nie pozwoliła im zdecydować, jak umrze. Paul nie pozwolił mi zejść.',
-    uk: 'На світанку ми побачили, як сардаукари змусили Кайнс іти в пустелю без води. Вона встромила в пісок стукач і заспівала. Вона не дала їм вирішити, як їй померти. Пол не дозволив мені спуститися.'
+  25: {
+    en: 'At the station Paul and Jessica told us how Jessica flew straight into the [[storm]]. Paul whispered the [[litany]]: “Fear is the mind-killer.” They came down alive on a dune, and Duncan found them there. I drew their route on my map. I wish I had been with them.',
+    pl: 'Na stacji Paul i Jessica opowiedzieli nam, jak Jessica wleciała prosto w burzę. Paul szeptał litanię: „Strach zabija umysł”. Spadli żywi na wydmę i tam znalazł ich Duncan. Narysował{em|am} ich trasę na mapie. Szkoda, że nie był{em|am} z nimi.',
+    uk: 'На станції Пол і Джессіка розповіли нам, як Джессіка повела орнітоптер просто в бурю. Пол шепотів літанію: «Страх — убивця розуму». Вони живими впали на дюну, і там їх знайшов Дункан. Я намалюва{в|ла} їхній шлях на мапі. Шкода, що мене не було з ними.'
   },
   28: {
+    en: 'From the top of the dune we saw the Sardaukar surround Kynes. She had stayed behind to hold them off. She drove a [[thumper]] into the sand. She didn\'t let them decide how she would die. Paul didn\'t let me go down.',
+    pl: 'Ze szczytu wydmy widzieliśmy, jak Sardaukarzy otaczają Kynes. Została, żeby ich zatrzymać. Wbiła ubijacz w piasek. Nie pozwoliła im decydować, jak umrze. Paul nie pozwolił mi zejść na dół.',
+    uk: 'З вершини дюни ми бачили, як сардаукари оточують Кайнс. Вона залишилася, щоб їх затримати. Вона встромила стукач у пісок. Вона не дозволила їм вирішувати, як вона помре. Пол не пустив мене вниз.'
+  },
+  29: {
     en: 'The plan: by dawn we will have walked thirty kilometres; at noon we will be hiding under the [[tent]]. By the end of the third night we will have reached the mountains. Jessica counts every [[sip]].',
     pl: 'Plan: do świtu przejdziemy trzydzieści kilometrów; w południe będziemy się chować pod namiotem. Do końca trzeciej nocy dojdziemy do gór. Jessica liczy każdy łyk.',
     uk: 'План: до світанку ми пройдемо тридцять кілометрів; опівдні ховатимемося під тентом. До кінця третьої ночі ми дійдемо до гір. Джессіка рахує кожен ковток.'
   },
-  29: {
-    en: 'Although it was stifling in the tent, nobody slept. The spice dust opened a [[vision]] to Paul: armies, a black-and-green [[banner]], a holy war. Despite his fear, he decided to go to the Fremen.',
-    pl: 'Chociaż w namiocie było duszno, nikt nie spał. Pył przyprawy otworzył przed Paulem wizję: armie, czarno-zielony sztandar, święta wojna. Mimo strachu postanowił iść do Fremenów.',
-    uk: 'Хоча в тенті було задушливо, ніхто не спав. Пил прянощів відкрив Полові видіння: армії, чорно-зелений прапор, священна війна. Попри страх, він вирішив іти до фрименів.'
+  26: {
+    en: 'Night at the station. Although nobody slept, Paul spoke quietly to his mother about the [[vision]] he had had in the tent after the storm: armies, a black-and-green [[banner]], a holy war. Despite his fear, he decided to go to the Fremen.',
+    pl: 'Noc na stacji. Chociaż nikt nie spał, Paul cicho opowiadał matce o wizji, którą miał w namiocie po burzy: armie, czarno-zielony sztandar, święta wojna. Mimo strachu postanowił iść do Fremenów.',
+    uk: 'Ніч на станції. Хоча ніхто не спав, Пол тихо розповідав матері про видіння, яке мав у наметі після бурі: армії, чорно-зелений прапор, священна війна. Попри страх, він вирішив іти до фрименів.'
   },
   30: {
     en: 'Twelve figures came down the dune at sunset. Jessica made me retell the whole road, quickly and correctly. The tall man pulled off his mask: it was Stilgar. “You walk like the Fremen,” he said. “Almost.”',

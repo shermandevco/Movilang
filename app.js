@@ -3140,7 +3140,7 @@ function wBindCards(root) {
 }
 
 /* dzienniki kursów (300 KB) ładują się po starcie strony, a nie razem z nią */
-var JOURNAL_FILES = ['hp:2', 'tvd:2', 'himym:2', 'friends:2', 'homealone:2', 'zootopia:2', 'cars:2', 'got:1', 'dune:1', 'mentalist:1'], JOURNALS_P = null;
+var JOURNAL_FILES = ['hp:2', 'tvd:3', 'himym:3', 'friends:2', 'homealone:2', 'zootopia:2', 'cars:2', 'got:1', 'dune:2', 'mentalist:1'], JOURNALS_P = null;
 function loadJournals() {
   if (!JOURNALS_P) JOURNALS_P = Promise.all(JOURNAL_FILES.map(function (f) { return new Promise(function (res) { var s = document.createElement('script'), a = f.split(':'); s.src = 'content/journal-' + a[0] + '.js?v=' + a[1]; s.async = true; s.onload = s.onerror = function () { res(); }; document.head.appendChild(s); }); }));
   return JOURNALS_P;

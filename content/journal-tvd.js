@@ -86,12 +86,12 @@
     pl: 'Elena zadzwoniła do mnie z Georgii! Wczoraj w nocy miała wypadek i samochód dachował. Kiedy się obudziła, była w aucie Damona w podróży. Mówi, że właściwie jej nie porwał. Zjechał na pobocze i kazał jej zapiąć pas. Damon Salvatore, policja od pasów bezpieczeństwa.',
     uk: 'Олена подзвонила мені з Джорджії! Учора вночі вона потрапила в аварію, і машина перекинулася. Коли вона прокинулася, то була в машині Деймона в дорозі. Каже, що він її не зовсім викрав. Він зупинився на узбіччі й змусив її пристебнутися. Деймон Сальваторе — поліція пасків безпеки.'
   },
-  18: {
+  19: {
     en: 'The [[decade dance]]! I wore a [[poodle skirt]] and we [[swing danced]] to the [[jukebox]] all night. Mr Saltzman was a [[chaperone]] and kept watching the doors. [[Back then]], in the fifties, people [[used to]] dance like this every weekend. I think I was born in the wrong decade.',
     pl: 'Bal lat pięćdziesiątych! Miał{em|am} spódnicę z pudlem i cały wieczór tańczyliśmy swinga do szafy grającej. Pan Saltzman był opiekunem i ciągle obserwował drzwi. Wtedy, w latach pięćdziesiątych, ludzie tańczyli tak w każdy weekend. Chyba urodził{em|am} się w złej dekadzie.',
     uk: 'Вечірка в стилі п\'ятдесятих! Я {мав|мала} спідницю з пуделем, і ми весь вечір танцювали свінг під музичний автомат. Містер Зальцман був черговим учителем і весь час стежив за дверима. Тоді, у п\'ятдесятих, люди танцювали так щовихідних. Здається, я народи{вся|лася} не в те десятиліття.'
   },
-  19: {
+  18: {
     en: 'In the [[library]] Jeremy met a girl called Anna. She helped him with his [[essay]] about the [[founding families]]. She\'s really [[smart]], [[although]] she asks a lot of questions about vampires. [[However]], Jeremy smiled for the first time in months, so I said nothing.',
     pl: 'W bibliotece Jeremy poznał dziewczynę o imieniu Anna. Pomogła mu z wypracowaniem o rodach założycieli. Jest naprawdę bystra, chociaż zadaje dużo pytań o wampiry. Jednak Jeremy pierwszy raz od miesięcy się uśmiechnął, więc nic nie powiedział{em|am}.',
     uk: 'У бібліотеці Джеремі познайомився з дівчиною на ім\'я Анна. Вона допомогла йому з есе про родини засновників. Вона справді розумна, хоча ставить багато запитань про вампірів. Проте Джеремі вперше за кілька місяців усміхнувся, тож я нічого не сказа{в|ла}.'

@@ -97,9 +97,9 @@
     uk: 'Вікторія в Німеччині, і різниця в часі все ускладнює. О другій ночі Робін подзвонила Тедові: «Ти спиш? Заїдеш?». Я сиді{в|ла} на його дивані й бачи{в|ла} його обличчя. Спокуса. Він намагався встояти й лишитися вірним. Після другої ночі нічого доброго не стається.'
   },
   20: {
-    en: 'Ted and Victoria [[broke up]]. The [[distance]] was too much, and it was [[mutual]], but it was still [[painful]]. "I [[should have]] gone with her," he said. "I [[could have]] learned German." I listened until 3 a.m. Some things just don\'t [[work out]].',
-    pl: 'Ted i Victoria się rozstali. Odległość była zbyt duża i to była wspólna decyzja, ale i tak bolało. „Powinienem był z nią pojechać” — powiedział. „Mogłem nauczyć się niemieckiego”. Słuchał{em|am} go do trzeciej w nocy. Niektóre rzeczy po prostu się nie układają.',
-    uk: 'Тед і Вікторія розійшлися. Відстань була завеликою, і це було взаємне рішення, але все одно боляче. «Мені треба було поїхати з нею, — сказав він. — Я міг би вивчити німецьку». Я слуха{в|ла} його до третьої ночі. Деякі речі просто не складаються.'
+    en: 'Ted and Victoria [[broke up]]. He was at Robin\'s place when Victoria called, and Robin answered his phone. It wasn\'t [[mutual]]: Victoria ended it, and it was [[painful]]. "I [[should have]] told Robin the truth," he said. "I [[could have]] avoided all this." Barney thinks the [[distance]] would have ended it anyway. Some things just don\'t [[work out]].',
+    pl: 'Ted i Victoria się rozstali. Był u Robin, kiedy zadzwoniła Victoria, a telefon odebrała Robin. To nie była wspólna decyzja: zakończyła to Victoria i bardzo bolało. „Powinienem był powiedzieć Robin prawdę” — powiedział. „Mogłem tego wszystkiego uniknąć”. Barney uważa, że i tak skończyłoby się przez odległość. Niektóre rzeczy po prostu się nie układają.',
+    uk: 'Тед і Вікторія розійшлися. Він був у Робін, коли подзвонила Вікторія, і слухавку взяла Робін. Це не було спільне рішення: Вікторія все закінчила, і це було боляче. «Мені треба було сказати Робін правду, — сказав він. — Я міг усього цього уникнути». Барні вважає, що відстань однаково все зруйнувала б. Деякі речі просто не складаються.'
   },
   21: {
     en: 'Marshall and Lily need a [[band]] for the wedding. We heard the perfect one… at a high school prom! So we all sneaked in to listen. "[[By then]] the band could be [[booked]]," Lily said, so she paid a [[deposit]] that night. [[This time next year]] they\'ll be married!',
@@ -107,12 +107,12 @@
     uk: 'Маршаллу й Лілі потрібен гурт на весілля. Ми почули ідеальний… на шкільному випускному! Тож ми всі прокралися туди послухати. «До того часу гурт можуть забронювати», — сказала Лілі, тож того ж вечора внесла завдаток. Цього часу наступного року вони вже будуть одружені!'
   },
   22: {
-    en: 'Ted woke up and finally [[realised]]: "[[What I want]] is Robin." It was so [[obvious]]. Everyone at MacLaren\'s knew about his [[crush]] except him. He had to [[admit it to himself]]. Robin, however, said she doesn\'t want anything serious. Poor Ted.',
-    pl: 'Ted się obudził i w końcu zrozumiał: „Tym, czego chcę, jest Robin”. To było takie oczywiste. Wszyscy w MacLaren\'s wiedzieli, że się w niej podkochuje, oprócz niego. Musiał przyznać się do tego przed sobą. Robin jednak powiedziała, że nie chce niczego poważnego. Biedny Ted.',
-    uk: 'Тед прокинувся й нарешті усвідомив: «Чого я хочу — це Робін». Це було так очевидно. Усі в MacLaren\'s знали, що він у неї закоханий, крім нього самого. Йому довелося зізнатися в цьому собі. Проте Робін сказала, що не хоче нічого серйозного. Бідний Тед.'
+    en: 'Lily [[realised]] something tonight: "[[What I want]] is to find out who I am." She has secretly applied for an art fellowship in San Francisco. It should be [[obvious]] to Marshall that something is wrong, but he doesn\'t see it. Ted still has a [[crush]] on Robin and can\'t [[admit it to himself]]. Lily\'s secret is safe with me, for now.',
+    pl: 'Lily coś dziś zrozumiała: „Chcę się dowiedzieć, kim jestem”. Potajemnie złożyła zgłoszenie na stypendium artystyczne w San Francisco. Marshall powinien widzieć, że coś jest nie tak, ale nie widzi. Ted wciąż kocha się w Robin i nie umie się do tego przyznać. Sekret Lily jest u mnie bezpieczny — na razie.',
+    uk: 'Лілі сьогодні дещо зрозуміла: «Я хочу дізнатися, хто я». Вона потай подала заявку на мистецьку стипендію в Сан-Франциско. Маршалл мав би бачити, що щось не так, але не бачить. Тед досі закоханий у Робін і не може собі в цьому зізнатися. Секрет Лілі в мене в безпеці — поки що.'
   },
   23: {
-    en: 'Ted and Robin are together! [[Although]] they\'re very different, they\'re good together. She\'s a [[dog person]] with five dogs, and Ted is a little [[allergic]] to their [[fur]]. [[Despite]] that, he offered to [[walk the dog]]s. I went with him. Five dogs [[barking]] at once — it\'s a sport.',
+    en: 'Future Ted jumped ahead tonight: a few months later, Ted and Robin are together! [[Although]] they\'re very different, they\'re good together. She\'s a [[dog person]] with five dogs, and Ted is a little [[allergic]] to their [[fur]]. [[Despite]] that, he offered to [[walk the dog]]s. I went with him. Five dogs [[barking]] at once — it\'s a sport.',
     pl: 'Ted i Robin są razem! Chociaż bardzo się różnią, pasują do siebie. Ona kocha psy i ma ich pięć, a Ted ma lekką alergię na ich sierść. Mimo to zaproponował, że wyprowadzi psy. Poszedł{em|am} z nim. Pięć szczekających naraz psów — to sport.',
     uk: 'Тед і Робін разом! Хоча вони дуже різні, їм добре разом. Вона собачниця з п\'ятьма собаками, а в Теда легка алергія на їхню шерсть. Попри це, він запропонував вигуляти собак. Я піш{ов|ла} з ним. П\'ять собак, які гавкають одночасно, — це спорт.'
   },
@@ -121,7 +121,7 @@
     pl: 'Ten miesiąc zaczął się o drugiej w nocy, a skończył pięcioma psami. Ted był wierny, potem pożegnał się z Victorią, a potem znalazł Robin. Nauczył{em|am} się jednej zasady: kiedy ktoś pisze do ciebie o drugiej w nocy, nie odpisuj. Po prostu idź spać.',
     uk: 'Цей місяць почався о другій ночі, а закінчився п\'ятьма собаками. Тед лишився вірним, потім попрощався з Вікторією, а потім знайшов Робін. Я засвої{в|ла} одне правило: коли тобі пишуть о другій ночі, не відповідай. Просто лягай спати.'
   },
-  25: {
+  31: {
     en: 'Ted planned a [[picnic]] on the roof for his first real date with Robin. The [[forecast]] said a 90% [[chance of rain]]. "[[Do you know]] if it\'ll stop?" he kept asking me. "[[I wonder if]] we should [[reschedule]]." In the end Barney did a rain dance. The rain stopped. I have no explanation.',
     pl: 'Ted zaplanował piknik na dachu na pierwszą prawdziwą randkę z Robin. Prognoza mówiła o 90% szans na deszcz. „Wiesz, czy przestanie?” — ciągle mnie pytał. „Zastanawiam się, czy nie przełożyć”. W końcu Barney zatańczył taniec deszczu. Deszcz przestał padać. Nie mam wyjaśnienia.',
     uk: 'Тед запланував пікнік на даху для першого справжнього побачення з Робін. Прогноз обіцяв 90% ймовірність дощу. «Ти не знаєш, чи він припиниться?» — постійно питав він мене. «Цікаво, чи не варто перенести». Зрештою Барні станцював танець дощу. Дощ припинився. У мене немає пояснення.'
@@ -151,7 +151,7 @@
     pl: 'W tym miesiącu: taniec deszczu, naleśniki, zasady Barneya, obraz Lily i konkurs przemówień. Ted i Robin są szczęśliwi, a ja nauczył{em|am} się przekładać plany, kiedy prognoza zapowiada deszcz. Albo po prostu dzwonić do Barneya.',
     uk: 'Цього місяця: танець дощу, млинці, правила Барні, картина Лілі й конкурс промов. Тед і Робін щасливі, а я навчи{вся|лася} переносити плани, коли прогноз обіцяє дощ. Або просто дзвонити Барні.'
   },
-  31: {
+  25: {
     en: 'Lily told me a secret: she went to an [[interview]] for an art fellowship in San Francisco. The [[panel]] [[asked if]] she [[was willing]] to move. She showed them her [[portfolio]] and they loved it. She hasn\'t told Marshall. I promised to say nothing, and I hate it.',
     pl: 'Lily powierzyła mi sekret: poszła na rozmowę w sprawie stypendium artystycznego w San Francisco. Komisja zapytała, czy jest gotowa się przeprowadzić. Pokazała im swoje portfolio i bardzo im się spodobało. Nie powiedziała Marshallowi. Obiecał{em|am}, że nic nie powiem, i bardzo mi z tym źle.',
     uk: 'Лілі розповіла мені таємницю: вона ходила на співбесіду на мистецьку стипендію в Сан-Франциско. Комісія спитала, чи готова вона переїхати. Вона показала їм своє портфоліо, і їм дуже сподобалося. Маршаллу вона не сказала. Я пообіця{в|ла} мовчати, і мені від цього погано.'
