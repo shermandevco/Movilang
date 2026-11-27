@@ -73,8 +73,8 @@ create or replace function eco_rule(p_course uuid, p_key text, p_def numeric) re
   select coalesce((select (rules->>p_key)::numeric from eco_rules where course_id = p_course), p_def);
 $$;
 
-create or replace function eco_month() returns text language sql stable as $$ select to_char(now() at time zone 'Europe/Warsaw', 'YYYY-MM'); $$;
-create or replace function eco_today() returns date language sql stable as $$ select (now() at time zone 'Europe/Warsaw')::date; $$;
+create or replace function eco_month() returns text language sql stable set search_path = public as $$ select to_char(now() at time zone 'Europe/Warsaw', 'YYYY-MM'); $$;
+create or replace function eco_today() returns date language sql stable set search_path = public as $$ select (now() at time zone 'Europe/Warsaw')::date; $$;
 
 -- внутрішнє: нарахувати (ідемпотентно за kind+ref). Повертає фактичну суму.
 create or replace function eco_credit(p_uid uuid, p_course uuid, p_kind text, p_ref text, p_amount int) returns int
@@ -100,7 +100,7 @@ declare pm text := to_char((now() at time zone 'Europe/Warsaw') - interval '1 mo
 begin
   if exists (select 1 from eco_cup_winners where course_id = p_course and month = pm) then return; end if;
   select faction, sum(amount)::int s into w from eco_ledger
-    where course_id = p_course and month = pm and amount > 0 and faction is not null group by faction order by 2 desc limit 1;
+    where course_id = p_course and month = pm and amount > 0 and faction is not null and kind <> 'cup' group by faction order by 2 desc limit 1;
   insert into eco_cup_winners(course_id, month, faction, coins) values (p_course, pm, w.faction, coalesce(w.s, 0)) on conflict do nothing;
 end $$;
 
@@ -137,7 +137,7 @@ declare uid uuid := auth.uid(); l record; sc int; target int; paid int; delta in
   boss boolean; lv0 int; lv1 int; w eco_wallets; t date := eco_today(); a int; streak int := 0; d date;
 begin
   if uid is null then raise exception 'not logged in'; end if;
-  select id, course_id, tasks, variants into l from lessons where id = p_lesson;
+  select id, course_id, tasks, variants, concat_ws(' ', title, title_pl, title_en) tt into l from lessons where id = p_lesson;
   if not found then raise exception 'no lesson'; end if;
   select max(greatest(score, coalesce(retry_score, 0))) into sc from (
     select score, retry_score from progress where user_id = uid and lesson_id = p_lesson
@@ -146,7 +146,7 @@ begin
   sc := least(greatest(sc, 0), 100);
   insert into eco_wallets(user_id, course_id) values (uid, l.course_id) on conflict do nothing;
   select xp into lv0 from eco_wallets where user_id = uid and course_id = l.course_id; lv0 := eco_level(lv0);
-  boss := exists (select 1 from jsonb_array_elements(coalesce(l.tasks, '[]')) x where x->>'type' = 'quest') or (l.variants ? 'cert');
+  boss := l.tt ~* '(boss|egzamin|exam|іспит|бос)' or (coalesce(l.variants, '{}') ? 'cert');
 
   -- урок: правильні відповіді + бонуси (доплачуємо різницю, якщо результат покращився)
   target := round(sc * eco_rule(l.course_id, 'correct', 15) / 100)
@@ -279,5 +279,6 @@ end $$;
 
 revoke all on function eco_credit(uuid, uuid, text, text, int) from public, anon, authenticated;
 revoke all on function eco_cup_settle(uuid) from public, anon, authenticated;
+revoke all on function eco_state(uuid), eco_claim_lesson(uuid), eco_claim_review(uuid, int), eco_buy(uuid, text), eco_equip(uuid, text, text), eco_use(uuid, text) from public, anon;
 grant execute on function eco_state(uuid), eco_claim_lesson(uuid), eco_claim_review(uuid, int), eco_buy(uuid, text), eco_equip(uuid, text, text), eco_use(uuid, text) to authenticated;
 grant execute on function eco_cup(uuid) to anon, authenticated;
