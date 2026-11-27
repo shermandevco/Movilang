@@ -3149,7 +3149,7 @@ function wRitual(c, onDone) {
 /* ---- панель світу на сторінці курсу ---- */
 function worldPanel(c, ls, done, enrolled) {
   var W = worldOf(c); if (!W) return;
-  var host = document.querySelector('.mcard .panel'); if (!host) return;
+  var host = document.getElementById('xWorld') || document.querySelector('.mcard .panel'); if (!host) return;
   var el = document.createElement('div'); el.className = 'w-panel'; el.innerHTML = '<span class="muted small">…</span>';
   var mh = host.querySelector('.mhead'); if (mh) mh.insertAdjacentElement('afterend', el); else host.prepend(el);
   wFaction(c).then(function (f) {
@@ -4812,6 +4812,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEv
           '<h1 class="x-h1">' + esc(tr(c, 'title')) + '</h1><p class="x-lead">' + esc(tr(c, 'description') || '') + '</p><div class="x-cta">' + cta + '</div></div>' +
           (enrolled ? '<div class="x-chero-r" data-r>' + ring(pct, 132, 12, Math.round(pct * 100) + '%') + '<b class="x-ring-t">' + Math.round(pct * 100) + '%</b><span>' + nDone + ' / ' + ls.length + ' ' + L('уроків', 'lekcji', 'lessons') + '</span></div>' : '') +
         '</div></section>' +
+        (USER && worldOf(c) ? '<section class="x-sec x-worldsec"><div class="x-head"><div><span class="x-k">' + L('Світ курсу', 'Świat kursu', 'Course world') + '</span><h2 class="x-h2">' + L('Фракція, спутник і лавка', 'Frakcja, towarzysz i sklep', 'Your side, companion & shop') + '</h2></div></div><div id="xWorld" class="x-world"></div></section>' : '') +
         (Object.keys(gram).length ? '<section class="x-sec"><div class="x-head" data-r><div><span class="x-k">' + L('Що ти вивчиш', 'Czego się nauczysz', 'What you’ll learn') + '</span><h2 class="x-h2">' + L('Граматика курсу', 'Gramatyka kursu', 'Course grammar') + '</h2></div></div><div class="x-gram" data-r>' + Object.keys(gram).slice(0, 18).map(function (gt, i) { return '<span style="--d:' + i * 30 + 'ms">' + esc(gt) + '</span>'; }).join('') + '</div></section>' : '') +
         (!ls.length ? '' : '<section class="x-sec x-arcs"><div class="x-head" data-r><div><span class="x-k">' + L('Програма', 'Program', 'Programme') + '</span><h2 class="x-h2">' + arcs.length + ' ' + (arcs.length > 1 ? L('арок історії', 'łuków fabuły', 'story arcs') : L('частина', 'część', 'part')) + '</h2></div></div>' +
           arcs.map(function (a, ai) {
@@ -4824,6 +4825,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEv
         (isAdm() ? '<p class="x-hint"><a href="#" id="xOldCourse">' + L('Старий вигляд сторінки (інструменти адміна)', 'Stary widok strony (narzędzia admina)', 'Old page view (admin tools)') + '</a></p>' : '') +
       '</div>';
       life($app);
+      if (document.getElementById('xWorld')) worldPanel(c, ls, done, enrolled);
       var oc = document.getElementById('xOldCourse'); if (oc) oc.onclick = function (e) { e.preventDefault(); OLD_ONCE = true; ROUTE_LAST = null; route(); };
     });
   }

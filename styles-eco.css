@@ -175,3 +175,9 @@ body.eco-themed #app{background:transparent}
   .eco-hintbtn{bottom:calc(76px + env(safe-area-inset-bottom));right:12px}
 }
 @media (prefers-reduced-motion:reduce){.eco-pet *,.eco-wallet::after,.eco-rays,.eco-w-i,.eco-spin,.eco-cup-i{animation:none!important}}
+
+/* світ курсу на новій сторінці курсу (v5) */
+.x-world .w-panel{margin:0;padding:18px;border-radius:20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+.x-world .w-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.x-world .w-links a{padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:inherit;text-decoration:none;font-size:14px}
+.x-world .w-links a:hover{background:rgba(255,255,255,.1)}
