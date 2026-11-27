@@ -4625,52 +4625,107 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEv
   try { ROUTE_LAST = null; } catch (e) {}
 })();
 
-/* ===== Кнопка «Урок»: веде на сторінку курсу й підсвічує потрібний урок ===== */
+/* ===== Кнопка «Урок»: вибір курсу → «кінозаставка» → прокрутка до потрібного уроку ===== */
 (function () {
   var L = function (uk, pl, en) { return tx({uk:uk, pl:pl, en:en}); };
-  var go = function (cid, lid, kind) { try { sessionStorage.setItem('ml_hl', JSON.stringify({c:cid, l:lid, k:kind, t:Date.now()})); } catch (e) {} location.replace('#/course/' + cid); };
-  var trial = function () {
-    return API.listCourses(false).then(function (cs) {
-      var c = cs.filter(function (x) { return x.lessons_count && x.free_first !== false; })[0] || cs.filter(function (x) { return x.lessons_count; })[0];
-      if (!c) { $app.innerHTML = '<div class="page"><div class="empty">' + L('Пробний урок з\'явиться згодом.', 'Lekcja próbna pojawi się wkrótce.', 'The free lesson is coming soon.') + '</div></div>'; return; }
-      return API.listLessons(c.id).then(function (ls) { var l = ls.filter(function (x) { return lessonTasks(x); })[0] || ls[0]; go(c.id, l && l.id, 'free'); });
+  var RM = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var pSrc = function (c) { if (c.poster_url && /^https:\/\//.test(c.poster_url)) return cdnPoster(c.poster_url); return POSTER_ART.indexOf(c.slug) > -1 ? 'assets/posters/' + c.slug + '.webp?v=3' : ''; };
+  var CINE = null;
+  /* --- кінозаставка --- */
+  function cine(it) {
+    var c = it.c, l = it.l, k = it.k, src = pSrc(c), n = l ? String(l.num).padStart(2, '0') : '01';
+    var eyebrow = k === 'free' ? L('Безкоштовний урок', 'Darmowa lekcja', 'Free lesson') : k === 'start' ? L('Початок курсу', 'Początek kursu', 'Course start') : L('Продовжуємо', 'Kontynuujemy', 'Continuing');
+    var o = document.createElement('div'); o.className = 'x-cine' + (RM ? ' rm' : '');
+    o.innerHTML = '<div class="xc-bg"' + (src ? ' style="background-image:url(' + esc(src) + ')"' : '') + '></div><div class="xc-grain"></div>' +
+      '<div class="xc-lead"><svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="88"/><circle cx="100" cy="100" r="70"/><path d="M100 0v200M0 100h200"/></svg><div class="xc-sweep"></div><b class="xc-n">3</b></div>' +
+      '<div class="xc-title"><span class="xc-eb">' + esc(eyebrow) + '</span><h2>' + esc(tr(c, 'title')) + '</h2>' + (l ? '<p><i>' + L('Урок', 'Lekcja', 'Lesson') + ' ' + n + '</i>' + esc(tr(l, 'title')) + '</p>' : '') + '</div>' +
+      '<div class="xc-bar t"></div><div class="xc-bar b"></div><button type="button" class="xc-skip">' + L('Пропустити', 'Pomiń', 'Skip') + ' ›</button>';
+    document.body.appendChild(o);
+    var done, p = new Promise(function (r) { done = r; }), timers = [], fin = false;
+    var at = function (ms, f) { timers.push(setTimeout(f, ms)); };
+    var end = function () { if (fin) return; fin = true; timers.forEach(clearTimeout); o.classList.add('open'); setTimeout(function () { o.remove(); }, 700); setTimeout(done, 250); };
+    o.querySelector('.xc-skip').onclick = end; o.addEventListener('click', function (e) { if (!e.target.closest('.xc-skip')) end(); });
+    requestAnimationFrame(function () { o.classList.add('in'); });
+    if (RM) { o.classList.add('t'); at(900, end); return p; }
+    var nEl = o.querySelector('.xc-n');
+    at(150, function () { o.classList.add('lead'); });
+    at(550, function () { nEl.textContent = '2'; nEl.classList.remove('tick'); void nEl.offsetWidth; nEl.classList.add('tick'); });
+    at(950, function () { nEl.textContent = '1'; nEl.classList.remove('tick'); void nEl.offsetWidth; nEl.classList.add('tick'); });
+    at(1350, function () { o.classList.add('flash', 't'); });
+    at(3000, end);
+    return p;
+  }
+  /* --- перехід: заставка + сторінка курсу під нею --- */
+  function play(it) {
+    try { sessionStorage.setItem('ml_hl', JSON.stringify({c:it.c.id, l:it.l && it.l.id, k:it.k, t:Date.now()})); } catch (e) {}
+    CINE = cine(it);
+    setTimeout(function () { location.replace('#/course/' + it.c.id); }, 60);
+  }
+  /* --- вибір курсу --- */
+  function picker(items) {
+    $app.innerHTML = '<div class="x-pick-page"></div>';
+    var o = document.createElement('div'); o.className = 'x-pick';
+    o.innerHTML = '<div class="xp-box"><div class="xp-h"><div><span class="xp-eb">' + L('Сеанс', 'Seans', 'Showtime') + '</span><h3>' + L('Що дивимось сьогодні?', 'Co dziś oglądamy?', 'What are we watching today?') + '</h3></div><button type="button" class="xp-x" aria-label="×">×</button></div><div class="xp-list">' +
+      items.map(function (it, i) { var c = it.c, src = pSrc(c), pct = it.total ? Math.round(it.doneN / it.total * 100) : 0;
+        var sub = it.k === 'free' ? L('Урок 1 — безкоштовно', 'Lekcja 1 — za darmo', 'Lesson 1 — free') : it.l ? L('Урок', 'Lekcja', 'Lesson') + ' ' + String(it.l.num).padStart(2, '0') + ' · ' + esc(tr(it.l, 'title')) : '';
+        return '<button type="button" class="xp-c" data-i="' + i + '" style="--d:' + (i * 70) + 'ms"><span class="xp-p"' + (src ? ' style="background-image:url(' + esc(src) + ')"' : '') + '></span><span class="xp-t">' +
+          (it.last ? '<em>' + L('Останній перегляд', 'Ostatnio oglądane', 'Last watched') + '</em>' : '') + '<b>' + esc(tr(c, 'title')) + '</b><small>' + sub + '</small>' +
+          (it.k !== 'free' ? '<span class="xp-bar"><i style="width:' + pct + '%"></i></span>' : '') + '</span><span class="xp-go">▶</span></button>'; }).join('') + '</div></div>';
+    document.body.appendChild(o); requestAnimationFrame(function () { o.classList.add('in'); });
+    var close = function (cb) { o.classList.remove('in'); o.classList.add('out'); setTimeout(function () { o.remove(); if (cb) cb(); }, 280); };
+    o.querySelector('.xp-x').onclick = function () { close(function () { location.replace('#/'); }); };
+    o.addEventListener('click', function (e) { if (e.target === o) close(function () { location.replace('#/'); }); var b = e.target.closest('.xp-c'); if (b) { var it = items[+b.dataset.i]; b.classList.add('pick'); setTimeout(function () { close(); play(it); }, 220); } });
+    var off = function () { if (!/^#\/trial/.test(location.hash) && document.body.contains(o)) o.remove(); window.removeEventListener('hashchange', off); };
+    window.addEventListener('hashchange', off);
+  }
+  function infoFor(c, done) {
+    return API.listLessons(c.id).then(function (ls) {
+      var avail = ls.filter(function (l) { return lessonTasks(l); });
+      var dn = avail.filter(function (l) { return done[l.id]; }).length;
+      var nx = avail.filter(function (l) { return !done[l.id]; })[0] || avail[avail.length - 1];
+      return {c:c, l:nx, k:dn ? 'next' : 'start', doneN:dn, total:avail.length, ids:ls.map(function (l) { return l.id; })};
     });
-  };
+  }
   viewTrial = function () {
-    if (!USER) return trial();
-    return API.myEnrollments().catch(function () { return []; }).then(function (cids) {
-      if (!cids || !cids.length) return trial();
-      var r = null; try { r = JSON.parse(localStorage.getItem('ml_resume') || 'null'); } catch (e) {}
-      var pick = r && r.tg === TARGET && r.lid ? API.getLesson(r.lid).then(function (l) { return l && cids.indexOf(l.course_id) > -1 ? l.course_id : null; }).catch(function () { return null; }) : Promise.resolve(null);
-      return pick.then(function (cid) {
-        cid = cid || cids[0];
-        return Promise.all([API.listLessons(cid), API.myProgress().catch(function () { return []; })]).then(function (y) {
-          var done = {}; (y[1] || []).forEach(function (p) { done[p.lesson_id] = 1; });
-          var avail = y[0].filter(function (l) { return lessonTasks(l); });
-          var nx = avail.filter(function (l) { return !done[l.id]; })[0] || avail[avail.length - 1];
-          go(cid, nx && nx.id, avail.some(function (l) { return done[l.id]; }) ? 'next' : 'start');
-        });
+    var resume = null; try { resume = JSON.parse(localStorage.getItem('ml_resume') || 'null'); } catch (e) {}
+    var lastL = resume && resume.tg === TARGET ? resume.lid : null;
+    return Promise.all([API.listCourses(false), USER ? API.myEnrollments().catch(function () { return []; }) : Promise.resolve([]), USER ? API.myProgress().catch(function () { return []; }) : Promise.resolve([])]).then(function (r) {
+      var cs = r[0].filter(function (c) { return c.lessons_count; }), cids = r[1] || [], done = {}; (r[2] || []).forEach(function (p) { done[p.lesson_id] = 1; });
+      var mine = cs.filter(function (c) { return cids.indexOf(c.id) > -1 || isFreeCourse(c); });
+      var paid = mine.length > 0;
+      var list = paid ? mine : cs.filter(function (c) { return c.free_first !== false; });
+      if (!list.length) { $app.innerHTML = '<div class="page"><div class="empty">' + L('Пробний урок з\'явиться згодом.', 'Lekcja próbna pojawi się wkrótce.', 'The free lesson is coming soon.') + '</div></div>'; return; }
+      return Promise.all(list.map(function (c) { return infoFor(c, done); })).then(function (items) {
+        items = items.filter(function (it) { return it.l; });
+        if (!paid) items.forEach(function (it) { it.k = 'free'; });
+        items.forEach(function (it) { it.last = !!(lastL && it.ids.indexOf(lastL) > -1); });
+        items.sort(function (a, b) { return (b.last - a.last) || ((b.doneN > 0) - (a.doneN > 0)); });
+        if (items.length === 1) { $app.innerHTML = '<div class="x-pick-page"></div>'; play(items[0]); return; }
+        picker(items);
       });
     });
   };
-  /* після рендеру курсу: підсвітка */
+  /* --- після рендеру курсу: чекаємо заставку, тоді прокрутка й підсвітка --- */
   var apply = function () {
     var h = null; try { h = JSON.parse(sessionStorage.getItem('ml_hl') || 'null'); } catch (e) {}
-    if (!h || !h.l || Date.now() - h.t > 15000 || location.hash.indexOf(h.c) < 0) return;
+    if (!h || !h.l || Date.now() - h.t > 20000 || location.hash.indexOf(h.c) < 0) return;
     sessionStorage.removeItem('ml_hl');
+    var wait = CINE || Promise.resolve(); CINE = null;
     var tries = 0;
     (function find() {
       var a = document.querySelector('a[href="#/lesson/' + h.l + '"]:not(.x-btn)');
       var li = a && a.closest('li');
-      if (!li) { if (++tries < 20) setTimeout(find, 150); return; }
+      if (!li) { if (++tries < 25) setTimeout(find, 150); return; }
       var det = li.closest('details'); if (det) det.open = true;
-      var label = h.k === 'free' ? L('Безкоштовно', 'Za darmo', 'Free') : h.k === 'start' ? L('Почни тут', 'Zacznij tutaj', 'Start here') : L('Наступний', 'Następna', 'Up next');
+      var label = h.k === 'free' ? L('Безкоштовно', 'Za darmo', 'Free') : h.k === 'start' ? L('Почни тут', 'Zacznij tutaj', 'Start here') : L('Тут ти зупинився', 'Tu skończyłeś', 'You stopped here');
       li.classList.add('x-hl', 'x-hl-' + h.k);
       var b = document.createElement('span'); b.className = 'x-hl-badge'; b.textContent = label;
       var lt = li.querySelector('.x-lt'); if (lt) lt.insertBefore(b, lt.firstChild);
-      if (h.k === 'free') { var cta = document.querySelector('.x-btn-a'); if (cta) cta.classList.add('x-hl-cta'); }
-      setTimeout(function () { li.scrollIntoView({behavior: 'smooth', block: 'center'}); }, 250);
-      setTimeout(function () { li.classList.add('x-hl-on'); }, 700);
+      window.scrollTo(0, 0);
+      wait.then(function () {
+        setTimeout(function () { li.scrollIntoView({behavior: RM ? 'auto' : 'smooth', block: 'center'}); }, 350);
+        setTimeout(function () { li.classList.add('x-hl-on'); if (h.k === 'free') { var cta = document.querySelector('.x-btn-a'); if (cta) cta.classList.add('x-hl-cta'); } }, 1100);
+      });
     })();
   };
   var _vc = viewCourse;
