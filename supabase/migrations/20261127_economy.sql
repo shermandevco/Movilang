@@ -282,3 +282,21 @@ revoke all on function eco_cup_settle(uuid) from public, anon, authenticated;
 revoke all on function eco_state(uuid), eco_claim_lesson(uuid), eco_claim_review(uuid, int), eco_buy(uuid, text), eco_equip(uuid, text, text), eco_use(uuid, text) from public, anon;
 grant execute on function eco_state(uuid), eco_claim_lesson(uuid), eco_claim_review(uuid, int), eco_buy(uuid, text), eco_equip(uuid, text, text), eco_use(uuid, text) to authenticated;
 grant execute on function eco_cup(uuid) to anon, authenticated;
+
+-- 2026-11-27: адмін — покупки без монет (eco_buy), прапорець admin в eco_state, скидання eco_reset(p_course, p_all).
+-- Застосовано через патч функцій у базі; актуальні визначення: select pg_get_functiondef('eco_buy(uuid,text)'::regprocedure).
+create or replace function eco_reset(p_course uuid, p_all boolean default false) returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare uid uuid := auth.uid();
+begin
+  if uid is null or not is_admin() then raise exception 'admin only'; end if;
+  update eco_wallets set owned = '{}', equipped = '{}', inv = '{}', boost = 0, fed_at = null, updated_at = now()
+    where user_id = uid and course_id = p_course;
+  if p_all then
+    update eco_wallets set coins = 0, earned = 0, spent = 0, xp = 0 where user_id = uid and course_id = p_course;
+    delete from eco_ledger where user_id = uid and course_id = p_course;
+  end if;
+  return eco_state(p_course);
+end $$;
+revoke all on function eco_reset(uuid, boolean) from public, anon;
+grant execute on function eco_reset(uuid, boolean) to authenticated;

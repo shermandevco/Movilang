@@ -3250,8 +3250,27 @@ function viewWorld(cid, tab) {
     return wFaction(c).then(function (f) {
       var F = f && W.factions[f], pts = wPoints(ls, done);
       var EC = ecoOf(c); window.ECO_LASTC = c; var tabs = [['me', tx({uk:'Мій світ', pl:'Mój świat', en:'My world'})]].concat(EC ? [['pet', EC.pet.stages[1] + ' ' + tx({uk:'Спутник', pl:'Towarzysz', en:'Companion'})], ['shop', '🛍️ ' + tx({uk:'Лавка', pl:'Sklep', en:'Shop'})]] : []).concat([['rank', '🏆 ' + wl(W.standings)], ['cards', W.cardIcon + ' ' + wl(W.collection)], ['journal', W.journal.icon + ' ' + wl(W.journal.title)]]);
-      $app.innerHTML = '<div class="page w-world"' + (F ? ' style="--fc:' + esc(F.color) + '"' : '') + '><div class="sec-head"><a href="#/course/' + esc(c.id) + '" class="muted small">← ' + esc(tr(c, 'title')) + '</a><div class="eyebrow">' + tx({uk:'Ігровий світ', pl:'Świat gry', en:'Game world'}) + '</div><h2>' + esc(tr(c, 'title')) + '</h2></div>' +
-        '<nav class="w-tabs">' + tabs.map(function (x) { return '<a href="#/world/' + esc(c.id) + '/' + x[0] + '" class="' + (x[0] === tab ? 'on' : '') + '">' + esc(x[1]) + '</a>'; }).join('') + '</nav><div id="wBody"></div></div>';
+      var nDoneW = ls.filter(function (l) { return done[l.id]; }).length, bossW = ls.filter(wIsBoss), nCardsW = bossW.filter(function (l) { return done[l.id]; }).length;
+      var artW = POSTER_ART.indexOf(c.slug) > -1 ? 'assets/posters/' + c.slug + '.webp?v=3' : '', quiet = window.WX_LAST === c.id;
+      var TI = {me:'🗺️', pet:EC ? EC.pet.stages[1] : '', shop:'🛍️', rank:'🏆', cards:W.cardIcon, journal:W.journal.icon};
+      $app.innerHTML = '<div class="page w-world wx' + (quiet ? ' wx-quiet' : '') + '" style="--fc:' + esc(F ? F.color : '#e8b93a') + '">' +
+        '<section class="wx-hero"><div class="wx-bg"' + (artW ? ' style="background-image:url(\'' + esc(artW) + '\')"' : '') + '></div><div class="wx-shade"></div><div class="wx-glow"></div>' +
+          '<div class="wx-parts" aria-hidden="true">' + Array.apply(null, Array(14)).map(function (_, i) { return '<i style="--i:' + i + ';--x:' + ((i * 37) % 100) + '%;--d:' + (6 + (i * 7) % 9) + 's"></i>'; }).join('') + '</div>' +
+          '<a class="wx-back" href="#/course/' + esc(c.id) + '">← ' + esc(tr(c, 'title')) + '</a>' +
+          '<div class="wx-hin"><div class="wx-crest">' + (F ? wCrest(F, true) : '<span class="w-crest big wx-q">' + esc(W.ritual.icon) + '</span>') + '<span class="wx-orbit"></span></div>' +
+            '<div class="wx-ht"><span class="wx-k">' + tx({uk:'Ігровий світ', pl:'Świat gry', en:'Game world'}) + '</span><h1>' + esc(tr(c, 'title')) + '</h1>' +
+            (F ? '<p class="wx-f"><b>' + esc(wl(F)) + '</b><span>' + esc(wl(F.motto)) + '</span></p>' : '<p class="wx-f"><span>' + esc(wl(W.ritual.title)) + '</span></p>') + '</div>' +
+            (EC && USER ? '<a class="wx-pet" id="wxPet" href="#/world/' + esc(c.id) + '/pet" aria-label="' + esc(wl(EC.pet.name)) + '"></a>' : '') + '</div>' +
+          (F ? '<div class="wx-stats">' +
+            '<div><b data-n="' + pts + '">' + (quiet ? pts : 0) + '</b><span>' + esc(W.points.icon + ' ' + wl(W.points)) + '</span></div>' +
+            '<div><b data-n="' + nDoneW + '" data-s="/' + ls.length + '">' + (quiet ? nDoneW + '/' + ls.length : '0/' + ls.length) + '</b><span>📚 ' + tx({uk:'уроків', pl:'lekcji', en:'lessons'}) + '</span></div>' +
+            '<div><b data-n="' + nCardsW + '" data-s="/' + bossW.length + '">' + (quiet ? nCardsW + '/' + bossW.length : '0/' + bossW.length) + '</b><span>' + esc(W.cardIcon + ' ' + wl(W.collection)) + '</span></div>' +
+            '<div id="wRank"><b>…</b><span>🏅 ' + tx({uk:'місце', pl:'miejsce', en:'rank'}) + '</span></div>' +
+            (EC && USER ? '<div id="wxCoins" style="--cc:' + esc(EC.cur.color) + '"><b>…</b><span>' + esc(EC.cur.icon + ' ' + wl(EC.cur.name)) + '</span></div>' : '') + '</div>' : '') +
+        '</section>' +
+        '<nav class="wx-tabs"><div class="wx-tabs-in">' + tabs.map(function (x) { var lbl = String(x[1]).replace(/^\S+\s/, function (m) { return /[A-Za-zА-Яа-яІіЇїЄєҐґĄąĆćĘęŁłŃńÓóŚśŹźŻż]/.test(m) ? m : ''; }); return '<a href="#/world/' + esc(c.id) + '/' + x[0] + '" data-t="' + x[0] + '" class="' + (x[0] === tab ? 'on' : '') + '"><span class="wx-ti">' + esc(TI[x[0]] || '') + '</span><span>' + esc(lbl) + '</span></a>'; }).join('') + '<i class="wx-ind"></i></div></nav>' +
+        '<div id="wBody" class="wx-body" data-tab="' + esc(tab) + '"></div></div>';
+      wxInit(c, EC, quiet);
       var body = document.getElementById('wBody');
       if (!F && tab !== 'rank') {
         body.innerHTML = '<div class="w-cta big"><span class="w-rit-i">' + esc(W.ritual.icon) + '</span><div><b>' + esc(wl(W.ritual.title)) + '</b><p class="muted">' + esc(wl(W.ritual.intro)) + '</p></div><button type="button" class="btn btn-red" id="wGo">' + tx({uk:'Почати ритуал', pl:'Zacznij rytuał', en:'Start the ritual'}) + '</button></div>';
@@ -3261,15 +3280,14 @@ function viewWorld(cid, tab) {
       if (tab === 'me') {
         var bosses = ls.filter(wIsBoss), nCards = bosses.filter(function (l) { return done[l.id]; }).length, nDone = ls.filter(function (l) { return done[l.id]; }).length;
         var arcs = []; ls.forEach(function (l) { var a = (l.variants && (l.variants['arc_' + LANG] || l.variants.arc)) || ''; var g = arcs[arcs.length - 1]; if (!g || g.name !== a) arcs.push(g = {name:a, n:0, d:0}); g.n++; if (done[l.id]) g.d++; });
-        body.innerHTML = '<div class="w-hero">' + wCrest(F, true) + '<div><small class="muted">' + tx({uk:'Твоя сторона', pl:'Twoja strona', en:'Your side'}) + '</small><h3>' + esc(wl(F)) + '</h3><p class="w-motto">' + esc(wl(F.motto)) + '</p></div></div>' +
-          '<div class="w-stats"><div><b>' + pts + '</b><span>' + esc(W.points.icon + ' ' + wl(W.points)) + '</span></div><div><b>' + nDone + '/' + ls.length + '</b><span>' + tx({uk:'уроків', pl:'lekcji', en:'lessons'}) + '</span></div><div><b>' + nCards + '/' + bosses.length + '</b><span>' + esc(wl(W.collection)) + '</span></div><div id="wRank"><b>…</b><span>' + tx({uk:'місце', pl:'miejsce', en:'rank'}) + '</span></div></div>' +
+        body.innerHTML = '<div class="w-stats wx-hide"><div><b>' + pts + '</b><span>' + esc(W.points.icon + ' ' + wl(W.points)) + '</span></div><div><b>' + nDone + '/' + ls.length + '</b><span>' + tx({uk:'уроків', pl:'lekcji', en:'lessons'}) + '</span></div><div><b>' + nCards + '/' + bosses.length + '</b><span>' + esc(wl(W.collection)) + '</span></div><div id="wRank"><b>…</b><span>' + tx({uk:'місце', pl:'miejsce', en:'rank'}) + '</span></div></div>' +
           '<h3 class="w-h">' + tx({uk:'Мапа арок', pl:'Mapa łuków', en:'Arc map'}) + '</h3><div class="w-map">' + arcs.map(function (a, i) { var pc = Math.round(a.d / a.n * 100); return '<div class="w-arc' + (pc >= 100 ? ' full' : '') + '"><span class="w-arc-n">' + (i + 1) + '</span><div><b>' + esc(a.name.replace(/^[^·]*·\s*/, '') || '—') + '</b><div class="w-bar"><i style="width:' + pc + '%"></i></div><small class="muted">' + a.d + '/' + a.n + '</small></div></div>'; }).join('') + '</div>' +
           '<h3 class="w-h">' + esc(wl(W.artifacts)) + '</h3><div class="bdgs">' + ls.filter(function (l) { return done[l.id] && l.variants && l.variants.badge; }).map(function (l) { var b = l.variants.badge; return '<div class="bdg" title="' + esc(lf(b, 'text') || '') + '"><span class="bdg-i">' + esc(b.icon) + '</span><b>' + esc(lf(b, 'name')) + '</b><small>' + tx({uk:'Урок ', pl:'Lekcja ', en:'Lesson '}) + l.num + '</small></div>'; }).join('') + '</div>';
         if (USER && SB()) rpc('world_me', {p_course:c.id}).then(function (x) { var rk = x && x[0] && x[0].rank; if (rk) document.querySelector('#wRank b').textContent = '#' + rk; }).catch(function () { document.querySelector('#wRank b').textContent = '—'; });
         else document.querySelector('#wRank b').textContent = '—';
       }
       if (tab === 'shop' || tab === 'pet') ecoTab(body, tab, c, W, F, ls, done);
-      if (USER && EC) ecoState(c).then(function (es) { applyEcoTheme(c); if (es && tab === 'me') { var hc = document.querySelector('.w-hero .w-crest'); if (hc) hc.outerHTML = ecoCrest(F, EC, es, true); } });
+      if (USER && EC) ecoState(c).then(function (es) { applyEcoTheme(c); if (es && tab === 'me') { var hc = document.querySelector('.wx-crest .w-crest'); if (hc) hc.outerHTML = ecoCrest(F, EC, es, true); } });
       if (tab === 'rank') {
         body.innerHTML = '<div id="ecoCup"></div>' + (EC ? '<h3 class="w-h">' + tx({uk:'За весь час', pl:'Od początku', en:'All time'}) + '</h3>' : '') + '<div id="wSt"><span class="muted">…</span></div><h3 class="w-h">' + tx({uk:'Топ-10 учнів', pl:'Top 10 uczniów', en:'Top 10 learners'}) + '</h3><div id="wTop"><span class="muted">…</span></div>';
         if (!SB()) { body.innerHTML = '<div class="empty">' + tx({uk:'Рейтинг доступний лише з базою.', pl:'Ranking dostępny tylko z bazą.', en:'Standings need the database.'}) + '</div>'; return; }
@@ -3302,6 +3320,36 @@ function viewWorld(cid, tab) {
   });
 }
 
+
+/* ---- світ курсу: оболонка (герой, вкладки з повзунком, лічильники) ---- */
+function wxInit(c, EC, quiet) {
+  window.WX_LAST = c.id;
+  var tabs = document.querySelector('.wx-tabs-in'), ind = tabs && tabs.querySelector('.wx-ind'), on = tabs && tabs.querySelector('a.on');
+  function place(el, anim) { if (!el || !ind) return; if (!anim) ind.style.transition = 'none'; ind.style.width = el.offsetWidth + 'px'; ind.style.transform = 'translateX(' + el.offsetLeft + 'px)'; if (!anim) { void ind.offsetWidth; ind.style.transition = ''; } }
+  if (on) {
+    var prev = window.WX_IND; if (prev && quiet) { ind.style.transition = 'none'; ind.style.width = prev.w + 'px'; ind.style.transform = 'translateX(' + prev.x + 'px)'; void ind.offsetWidth; ind.style.transition = ''; requestAnimationFrame(function () { place(on, true); }); } else place(on, false);
+    window.WX_IND = {x:on.offsetLeft, w:on.offsetWidth};
+    var sc = tabs.parentNode; if (on.offsetLeft + on.offsetWidth > sc.clientWidth || on.offsetLeft < sc.scrollLeft) sc.scrollLeft = on.offsetLeft - 24;
+    tabs.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', function () { place(a, true); window.WX_IND = {x:a.offsetLeft, w:a.offsetWidth}; tabs.querySelectorAll('a').forEach(function (b) { b.classList.toggle('on', b === a); }); }); });
+    window.addEventListener('resize', function rs() { if (!document.body.contains(on)) { window.removeEventListener('resize', rs); return; } place(tabs.querySelector('a.on'), false); });
+  }
+  if (!quiet) document.querySelectorAll('.wx-stats b[data-n]').forEach(function (b, i) { var n = +b.dataset.n, suf = b.dataset.s || ''; setTimeout(function () { var t0 = performance.now(); (function f(t) { var k = Math.min(1, (t - t0) / 1000), e = 1 - Math.pow(1 - k, 3); b.textContent = Math.round(n * e) + suf; if (k < 1) requestAnimationFrame(f); })(t0); }, 250 + i * 90); });
+  if (USER && SB()) rpc('world_me', {p_course:c.id}).then(function (x) { var rk = x && x[0] && x[0].rank, el = document.querySelector('#wRank b'); if (el) el.textContent = rk ? '#' + rk : '—'; }).catch(function () { var el = document.querySelector('#wRank b'); if (el) el.textContent = '—'; });
+  else { var el = document.querySelector('#wRank b'); if (el) el.textContent = '—'; }
+  if (EC && USER) ecoState(c).then(function (s) {
+    var pe = document.getElementById('wxPet'), co = document.querySelector('#wxCoins b');
+    if (!s) { if (pe) pe.remove(); if (co) co.parentNode.remove(); return; }
+    if (pe) pe.innerHTML = ecoPet(EC, s) + '<small>' + tx({uk:'рів. ', pl:'poz. ', en:'lvl '}) + ecoLevel(s.xp) + '</small>';
+    if (co) { if (s.admin) co.textContent = '∞'; else if (quiet) co.textContent = s.coins; else ecoCount(co, 0, s.coins, 1000); }
+  });
+  /* легкий паралакс фону героя */
+  var hero = document.querySelector('.wx-hero'), bg = hero && hero.querySelector('.wx-bg');
+  if (bg && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var onScroll = function () { if (!document.body.contains(bg)) { window.removeEventListener('scroll', onScroll); return; } var y = Math.min(300, window.scrollY); bg.style.transform = 'translateY(' + (y * .35) + 'px) scale(' + (1.08 + y / 3000) + ')'; };
+    window.addEventListener('scroll', onScroll, {passive:true});
+    hero.addEventListener('pointermove', function (e) { var r = hero.getBoundingClientRect(), dx = (e.clientX - r.left) / r.width - .5, dy = (e.clientY - r.top) / r.height - .5; hero.style.setProperty('--mx', dx.toFixed(3)); hero.style.setProperty('--my', dy.toFixed(3)); });
+  }
+}
 
 /* ================= ЕКОНОМІКА КУРСУ: монети, лавка, спутник, кубок місяця ================= */
 /* Дані: eco.js (MOVILANG_ECO). Монети рахує сервер (RPC eco_*); тут лише показ і анімації. */
@@ -3439,14 +3487,27 @@ function ecoTab(body, tab, c, W, F, ls, done) {
   });
 }
 function ecoHead(c, E, s) {
-  return '<div class="eco-wallet" style="--cc:' + esc(E.cur.color) + '"><div class="eco-w-l"><span class="eco-w-i">' + esc(E.cur.icon) + '</span><div><b id="ecoBal">' + s.coins + '</b><small>' + esc(wl(E.cur.name)) + '</small></div></div>' +
+  return '<div class="eco-wallet' + (s.admin ? ' adm' : '') + '" style="--cc:' + esc(E.cur.color) + '"><div class="eco-w-l"><span class="eco-w-i">' + esc(E.cur.icon) + '</span><div><b id="ecoBal">' + (s.admin ? '∞' : s.coins) + '</b><small>' + esc(wl(E.cur.name)) + '</small></div></div>' +
     '<div class="eco-w-r"><span title="' + esc(tx({uk:'Зароблено всього', pl:'Zarobione łącznie', en:'Earned in total'})) + '">↑ ' + s.earned + '</span><span title="' + esc(tx({uk:'Витрачено', pl:'Wydane', en:'Spent'})) + '">↓ ' + s.spent + '</span>' +
     ((s.inv && s.inv.hint) ? '<span>💡 ' + s.inv.hint + '</span>' : '') + ((s.inv && s.inv.freeze) ? '<span>❄️ ' + s.inv.freeze + '</span>' : '') + (s.boost ? '<span>×2 · ' + s.boost + '</span>' : '') + '</div></div>';
+}
+function ecoAdminBar(s) {
+  if (!s || !s.admin) return '';
+  return '<div class="eco-adm"><span>🛠️ ' + tx({uk:'Адмін: монети без ліміту, покупки безкоштовні.', pl:'Admin: monety bez limitu, zakupy za darmo.', en:'Admin: unlimited coins, free purchases.'}) + '</span>' +
+    '<button type="button" class="btn btn-sm btn-ghost" data-reset="0">' + tx({uk:'Скинути покупки', pl:'Wyczyść zakupy', en:'Reset purchases'}) + '</button>' +
+    '<button type="button" class="btn btn-sm btn-ghost" data-reset="1">' + tx({uk:'Скинути все (рівень, монети)', pl:'Wyczyść wszystko (poziom, monety)', en:'Reset everything (level, coins)'}) + '</button></div>';
+}
+function ecoAdminBind(body, c, done) {
+  body.querySelectorAll('[data-reset]').forEach(function (b) { b.onclick = function () {
+    if (!b.dataset.arm) { b.dataset.arm = 1; b.dataset.t = b.textContent; b.textContent = tx({uk:'Точно? Натисни ще раз', pl:'Na pewno? Kliknij jeszcze raz', en:'Sure? Tap again'}); b.classList.add('arm'); setTimeout(function () { if (b.isConnected) { delete b.dataset.arm; b.textContent = b.dataset.t; b.classList.remove('arm'); } }, 3000); return; }
+    b.disabled = true;
+    rpc('eco_reset', {p_course:c.id, p_all:b.dataset.reset === '1'}).then(function (ns) { ecoPut(c, ns); toast(tx({uk:'Скинуто', pl:'Wyczyszczono', en:'Reset done'})); done(ns); }).catch(function () { b.disabled = false; toast(tx({uk:'Не вдалося скинути', pl:'Nie udało się', en:'Reset failed'}), 'err'); });
+  }; });
 }
 function ecoShop(body, c, E, W, F, s) {
   var owned = s.owned || [], eq = s.equipped || {}, inv = s.inv || {};
   function card(it) {
-    var k = ECO_KIND[it.kind], has = owned.indexOf(it.id) > -1, on = eq[it.kind] === it.id, cnt = it.kind === 'boost' ? s.boost : inv[it.kind], poor = s.coins < it.price;
+    var k = ECO_KIND[it.kind], has = owned.indexOf(it.id) > -1, on = eq[it.kind] === it.id, cnt = it.kind === 'boost' ? s.boost : inv[it.kind], poor = !s.admin && s.coins < it.price;
     var prev = it.kind === 'theme' ? '<span class="eco-prev th" style="background:' + esc(it.bg) + '">' + esc(it.icon) + '</span>' : it.kind === 'frame' ? '<span class="eco-prev fr" style="--ring:' + esc(it.ring) + '">' + esc(F ? F.icon : it.icon) + '</span>' :
       it.kind === 'sticker' ? '<span class="eco-prev st">' + it.pack.slice(0, 4).map(esc).join('') + '</span>' : '<span class="eco-prev">' + esc(it.icon) + '</span>';
     var btn = has ? (it.kind === 'sticker' ? '<span class="eco-own">✓ ' + tx({uk:'У чатах', pl:'W czatach', en:'In chats'}) + '</span>' : '<button type="button" class="btn btn-sm ' + (on ? 'btn-ghost' : 'btn-red') + '" data-eq="' + esc(it.id) + '" data-slot="' + esc(it.kind) + '">' + (on ? tx({uk:'Зняти', pl:'Zdejmij', en:'Unequip'}) : tx({uk:'Надіти', pl:'Załóż', en:'Equip'})) + '</button>')
@@ -3454,16 +3515,17 @@ function ecoShop(body, c, E, W, F, s) {
     return '<div class="eco-item k-' + esc(it.kind) + (on ? ' on' : '') + (has ? ' has' : '') + '">' + prev + '<div class="eco-it"><b>' + esc(wl(it.name)) + '</b><small>' + esc(tx(k.t)) + '</small></div><div class="eco-ib">' + (cnt ? '<span class="eco-cnt">×' + cnt + '</span>' : '') + btn + '</div></div>';
   }
   var grp = function (g) { return E.items.filter(function (i) { return ECO_KIND[i.kind].g === g; }).map(card).join(''); };
-  body.innerHTML = ecoHead(c, E, s) +
+  body.innerHTML = ecoHead(c, E, s) + ecoAdminBar(s) +
     '<div class="eco-twist"><span>' + esc(E.twist.icon) + '</span><div><small>' + tx({uk:'Особливість економіки курсу', pl:'Cecha ekonomii kursu', en:'This course\'s economy'}) + '</small><b>' + esc(wl(E.twist.name)) + '</b><p>' + esc(wl(E.twist.text)) + '</p></div></div>' +
     '<h3 class="w-h">' + tx({uk:'Корисне', pl:'Przydatne', en:'Useful'}) + '</h3><div class="eco-grid">' + grp('use') + '</div>' +
     '<h3 class="w-h">' + tx({uk:'Оформлення', pl:'Wygląd', en:'Looks'}) + '</h3><div class="eco-grid">' + grp('look') + '</div>' +
     '<h3 class="w-h">' + tx({uk:'Для спутника', pl:'Dla towarzysza', en:'For your companion'}) + '</h3><div class="eco-grid">' + grp('pet') + '</div>' +
     '<details class="eco-how"><summary>' + tx({uk:'Як заробити ', pl:'Jak zarobić ', en:'How to earn '}) + esc(wl(E.cur.name)) + '</summary>' + ecoEarnList(E) + '<p class="small muted">' + tx({uk:'Монети рахує сервер і не продаються за гроші — лише за навчання.', pl:'Monety liczy serwer i nie można ich kupić za pieniądze — tylko za naukę.', en:'Coins are counted on the server and can\'t be bought — only earned by learning.'}) + '</p></details>';
+  ecoAdminBind(body, c, function (ns) { ecoShop(body, c, E, W, F, ns); applyEcoTheme(c); });
   body.querySelectorAll('[data-buy]').forEach(function (b) { b.onclick = function () {
-    var it = ecoItem(E, b.dataset.buy); if (s.coins < it.price) { b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); toast(tx({uk:'Не вистачає ', pl:'Brakuje ', en:'You need '}) + (it.price - s.coins) + ' ' + E.cur.icon, 'err'); return; }
+    var it = ecoItem(E, b.dataset.buy); if (!s.admin && s.coins < it.price) { b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); toast(tx({uk:'Не вистачає ', pl:'Brakuje ', en:'You need '}) + (it.price - s.coins) + ' ' + E.cur.icon, 'err'); return; }
     var bal = document.getElementById('ecoBal'), from = s.coins;
-    ecoBuy(c, E, it.id, b).then(function (ns) { ecoCount(bal, from, ns.coins, 600); setTimeout(function () { ecoShop(body, c, E, W, F, ns); applyEcoTheme(c); }, 650); }).catch(function () {});
+    ecoBuy(c, E, it.id, b).then(function (ns) { if (!ns.admin) ecoCount(bal, from, ns.coins, 600); setTimeout(function () { ecoShop(body, c, E, W, F, ns); applyEcoTheme(c); }, 650); }).catch(function () {});
   }; });
   body.querySelectorAll('[data-eq]').forEach(function (b) { b.onclick = function () {
     var on = s.equipped && s.equipped[b.dataset.slot] === b.dataset.eq; b.disabled = true;
@@ -3474,18 +3536,19 @@ function ecoPetTab(body, c, E, W, F, s, ls, done) {
   var lv = ecoLevel(s.xp), st = ecoStage(lv), food = E.items.filter(function (i) { return i.kind === 'food'; })[0], w = st >= 1 ? ecoWord(ls, done) : null;
   var outs = E.items.filter(function (i) { return i.kind === 'outfit' && (s.owned || []).indexOf(i.id) > -1; }), eq = (s.equipped || {}).outfit;
   var fedAgo = s.fed_at ? (Date.now() - new Date(s.fed_at).getTime()) / 3600000 : 99;
-  body.innerHTML = ecoHead(c, E, s) +
+  body.innerHTML = ecoHead(c, E, s) + ecoAdminBar(s) +
     '<div class="eco-home" style="--aura:' + esc(E.pet.aura) + '"><div class="eco-stage">' + ecoPet(E, s, true) +
       (w ? '<div class="eco-talk"><small>' + esc(wl(E.pet.talk)) + '</small><b>' + esc(w.w) + '</b><span class="muted small">' + esc(wordMeaning(w)) + '</span></div>' : '') + '</div>' +
     '<div class="eco-pinfo"><small class="muted">' + tx({uk:'Твій спутник', pl:'Twój towarzysz', en:'Your companion'}) + '</small><h3>' + esc(wl(E.pet.name)) + '</h3>' + ecoXpBar(s) +
       '<p class="eco-mood">' + esc(ecoMoodTxt(E, s.xp > 0 && s.mood === 'new' ? 'happy' : s.mood)) + '</p>' +
-      (food ? '<button type="button" class="btn btn-red eco-feed" id="ecoFeed"' + (s.coins < food.price ? ' disabled' : '') + '>' + esc(food.icon) + ' ' + tx({uk:'Нагодувати', pl:'Nakarm', en:'Feed'}) + ' · ' + esc(E.cur.icon) + ' ' + food.price + ' <small>+' + (E.rules.food_xp || 20) + ' XP</small></button>' : '') +
+      (food ? '<button type="button" class="btn btn-red eco-feed" id="ecoFeed"' + (!s.admin && s.coins < food.price ? ' disabled' : '') + '>' + esc(food.icon) + ' ' + tx({uk:'Нагодувати', pl:'Nakarm', en:'Feed'}) + ' · ' + esc(E.cur.icon) + ' ' + food.price + ' <small>+' + (E.rules.food_xp || 20) + ' XP</small></button>' : '') +
       (fedAgo < 12 ? '<p class="small muted">' + tx({uk:'Нещодавно поїв — дякує!', pl:'Niedawno jadł — dziękuje!', en:'Recently fed — thank you!'}) + '</p>' : '') + '</div></div>' +
     '<h3 class="w-h">' + tx({uk:'Шлях еволюції', pl:'Ścieżka ewolucji', en:'Evolution path'}) + '</h3><div class="eco-path">' + [1, 3, 6, 10].map(function (L, i) {
       return '<div class="eco-step' + (st >= i ? ' got' : '') + (st === i ? ' now' : '') + '"><span>' + esc(i <= st ? E.pet.stages[i] : '❔') + '</span><b>' + tx({uk:'Рівень ', pl:'Poziom ', en:'Level '}) + L + '</b><small>' + [tx({uk:'Народження', pl:'Narodziny', en:'Birth'}), tx({uk:'Говорить слова дня', pl:'Mówi słowa dnia', en:'Says words of the day'}), tx({uk:'Доросла форма', pl:'Dorosła forma', en:'Adult form'}), tx({uk:'Легендарна форма', pl:'Legendarna forma', en:'Legendary form'})][i] + '</small></div>';
     }).join('') + '</div>' +
     '<h3 class="w-h">' + tx({uk:'Гардероб', pl:'Garderoba', en:'Wardrobe'}) + '</h3>' + (outs.length ? '<div class="eco-wardrobe">' + outs.map(function (o) { return '<button type="button" class="eco-wear' + (eq === o.id ? ' on' : '') + '" data-wear="' + esc(o.id) + '"><span>' + esc(o.icon) + '</span><small>' + esc(wl(o.name)) + '</small></button>'; }).join('') + '</div>'
       : '<p class="muted">' + tx({uk:'Поки порожньо. Одяг для спутника — у ', pl:'Na razie pusto. Stroje są w ', en:'Empty for now. Outfits are in the '}) + '<a href="#/world/' + esc(c.id) + '/shop">' + tx({uk:'лавці', pl:'sklepie', en:'shop'}) + '</a>.' + (st < 1 ? ' ' + tx({uk:'Одяг видно з 3-го рівня.', pl:'Strój widać od 3. poziomu.', en:'Outfits show from level 3.'}) : '') + '</p>');
+  ecoAdminBind(body, c, function (ns) { ecoPetTab(body, c, E, W, F, ns, ls, done); });
   var fb = body.querySelector('#ecoFeed'); if (fb) fb.onclick = function () {
     var pet = body.querySelector('.eco-stage .eco-pet'), lv0 = ecoLevel(s.xp), fly = document.createElement('span'); fly.className = 'eco-food'; fly.textContent = food.icon; body.querySelector('.eco-stage').appendChild(fly);
     ecoBuy(c, E, food.id, fb).then(function (ns) { pet.classList.add('eat'); setTimeout(function () { fly.remove(); ecoPetTab(body, c, E, W, F, ns, ls, done); if (ns.level > lv0) ecoLevelUp(E, ns, lv0); }, 1100); }).catch(function () { fly.remove(); });
