@@ -466,3 +466,19 @@ html[data-v5] .x-cta-note{margin:14px 0 0;font-size:14px;color:var(--x-mu)}
 
 /* pulpit bez rozpoczętego kursu: tekst na całą szerokość karty */
 html[data-v5] .x-next-c.x-next-empty{grid-template-columns:minmax(0,1fr) auto!important;padding:20px}
+/* підсвітка уроку з кнопки «Урок» */
+.x-ls li.x-hl{position:relative;border-radius:18px}
+.x-ls li.x-hl>a{position:relative;z-index:1}
+.x-ls li.x-hl::before{content:"";position:absolute;inset:0;border-radius:18px;background:color-mix(in srgb,var(--x-ac,#ff7a59) 14%,transparent);box-shadow:0 0 0 2px var(--x-ac,#ff7a59);opacity:0;transform:scale(.96);transition:opacity .45s ease,transform .55s cubic-bezier(.22,1,.36,1)}
+.x-ls li.x-hl-on::before{opacity:1;transform:none;animation:xHlPulse 1.6s ease-out .55s 3}
+.x-ls li.x-hl-on .x-ls-go{animation:xHlGo 1.6s ease-in-out .3s infinite}
+.x-ls li.x-hl-on .x-ln{animation:xHlPop .6s cubic-bezier(.34,1.56,.64,1) both}
+.x-hl-badge{justify-self:start;display:inline-block;margin-bottom:4px;padding:3px 10px;border-radius:999px;font:700 11px/1.4 var(--x-d,inherit);letter-spacing:.04em;text-transform:uppercase;background:var(--x-ac,#ff7a59);color:var(--x-on,#1a1030);opacity:0;transform:translateY(6px) scale(.85)}
+.x-hl-free .x-hl-badge{background:#2fbf71;color:#fff}
+.x-hl-on .x-hl-badge{animation:xHlBadge .5s cubic-bezier(.34,1.56,.64,1) .15s forwards}
+.x-hl-cta{animation:xHlGo 1.6s ease-in-out .8s 3}
+@keyframes xHlPulse{0%{box-shadow:0 0 0 2px var(--x-ac,#ff7a59),0 0 0 0 color-mix(in srgb,var(--x-ac,#ff7a59) 45%,transparent)}70%{box-shadow:0 0 0 2px var(--x-ac,#ff7a59),0 0 0 14px transparent}100%{box-shadow:0 0 0 2px var(--x-ac,#ff7a59),0 0 0 0 transparent}}
+@keyframes xHlGo{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+@keyframes xHlPop{0%{transform:scale(.7)}100%{transform:scale(1)}}
+@keyframes xHlBadge{to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.x-ls li.x-hl-on::before,.x-ls li.x-hl-on .x-ls-go,.x-hl-cta,.x-ls li.x-hl-on .x-ln{animation:none}.x-hl-on .x-hl-badge{animation:none;opacity:1;transform:none}}

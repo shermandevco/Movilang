@@ -4625,4 +4625,56 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEv
   try { ROUTE_LAST = null; } catch (e) {}
 })();
 
+/* ===== Кнопка «Урок»: веде на сторінку курсу й підсвічує потрібний урок ===== */
+(function () {
+  var L = function (uk, pl, en) { return tx({uk:uk, pl:pl, en:en}); };
+  var go = function (cid, lid, kind) { try { sessionStorage.setItem('ml_hl', JSON.stringify({c:cid, l:lid, k:kind, t:Date.now()})); } catch (e) {} location.replace('#/course/' + cid); };
+  var trial = function () {
+    return API.listCourses(false).then(function (cs) {
+      var c = cs.filter(function (x) { return x.lessons_count && x.free_first !== false; })[0] || cs.filter(function (x) { return x.lessons_count; })[0];
+      if (!c) { $app.innerHTML = '<div class="page"><div class="empty">' + L('Пробний урок з\'явиться згодом.', 'Lekcja próbna pojawi się wkrótce.', 'The free lesson is coming soon.') + '</div></div>'; return; }
+      return API.listLessons(c.id).then(function (ls) { var l = ls.filter(function (x) { return lessonTasks(x); })[0] || ls[0]; go(c.id, l && l.id, 'free'); });
+    });
+  };
+  viewTrial = function () {
+    if (!USER) return trial();
+    return API.myEnrollments().catch(function () { return []; }).then(function (cids) {
+      if (!cids || !cids.length) return trial();
+      var r = null; try { r = JSON.parse(localStorage.getItem('ml_resume') || 'null'); } catch (e) {}
+      var pick = r && r.tg === TARGET && r.lid ? API.getLesson(r.lid).then(function (l) { return l && cids.indexOf(l.course_id) > -1 ? l.course_id : null; }).catch(function () { return null; }) : Promise.resolve(null);
+      return pick.then(function (cid) {
+        cid = cid || cids[0];
+        return Promise.all([API.listLessons(cid), API.myProgress().catch(function () { return []; })]).then(function (y) {
+          var done = {}; (y[1] || []).forEach(function (p) { done[p.lesson_id] = 1; });
+          var avail = y[0].filter(function (l) { return lessonTasks(l); });
+          var nx = avail.filter(function (l) { return !done[l.id]; })[0] || avail[avail.length - 1];
+          go(cid, nx && nx.id, avail.some(function (l) { return done[l.id]; }) ? 'next' : 'start');
+        });
+      });
+    });
+  };
+  /* після рендеру курсу: підсвітка */
+  var apply = function () {
+    var h = null; try { h = JSON.parse(sessionStorage.getItem('ml_hl') || 'null'); } catch (e) {}
+    if (!h || !h.l || Date.now() - h.t > 15000 || location.hash.indexOf(h.c) < 0) return;
+    sessionStorage.removeItem('ml_hl');
+    var tries = 0;
+    (function find() {
+      var a = document.querySelector('a[href="#/lesson/' + h.l + '"]:not(.x-btn)');
+      var li = a && a.closest('li');
+      if (!li) { if (++tries < 20) setTimeout(find, 150); return; }
+      var det = li.closest('details'); if (det) det.open = true;
+      var label = h.k === 'free' ? L('Безкоштовно', 'Za darmo', 'Free') : h.k === 'start' ? L('Почни тут', 'Zacznij tutaj', 'Start here') : L('Наступний', 'Następna', 'Up next');
+      li.classList.add('x-hl', 'x-hl-' + h.k);
+      var b = document.createElement('span'); b.className = 'x-hl-badge'; b.textContent = label;
+      var lt = li.querySelector('.x-lt'); if (lt) lt.insertBefore(b, lt.firstChild);
+      if (h.k === 'free') { var cta = document.querySelector('.x-btn-a'); if (cta) cta.classList.add('x-hl-cta'); }
+      setTimeout(function () { li.scrollIntoView({behavior: 'smooth', block: 'center'}); }, 250);
+      setTimeout(function () { li.classList.add('x-hl-on'); }, 700);
+    })();
+  };
+  var _vc = viewCourse;
+  viewCourse = function (id) { return Promise.resolve(_vc(id)).then(function (x) { try { apply(); } catch (e) {} return x; }); };
+})();
+
 })();
