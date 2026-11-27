@@ -4631,13 +4631,35 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEv
   var RM = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   var pSrc = function (c) { if (c.poster_url && /^https:\/\//.test(c.poster_url)) return cdnPoster(c.poster_url); return POSTER_ART.indexOf(c.slug) > -1 ? 'assets/posters/' + c.slug + '.webp?v=3' : ''; };
   var CINE = null;
+
+  /* --- тематичні заставки (оригінальна графіка, без логотипів) --- */
+  var THEME_OF = {'harry-potter-1':'magic','vampire-diaries-1':'blood','home-alone':'lights','friends-s1':'coffee','zootopia':'paws','himym-s1':'umbrella','cars':'race','game-of-thrones-1':'winter','dune-1':'sand','mentalist-1':'lens'};
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+  function rep(n, f) { var h = ''; for (var i = 0; i < n; i++) h += f(i); return h; }
+  function themeHtml(t) {
+    if (t === 'magic') return '<svg class="w" viewBox="0 0 300 300"><path class="trail" d="M40 250 C 90 200, 70 120, 150 120 S 240 60, 250 40"/></svg>' +
+      rep(26, function (i) { var a = i / 26 * 6.283, r = rnd(60, 140); return '<i class="sp" style="--x:' + Math.cos(a) * r + 'px;--y:' + Math.sin(a) * r + 'px;--d:' + (700 + rnd(0, 250)) + 'ms;--s:' + rnd(3, 7) + 'px"></i>'; }) + '<i class="core"></i>';
+    if (t === 'blood') return '<i class="moon"></i><i class="drop"></i><i class="rip r1"></i><i class="rip r2"></i><i class="rip r3"></i>';
+    if (t === 'lights') return '<svg class="wire" viewBox="0 0 400 120" preserveAspectRatio="none"><path d="M0 30 Q 100 90 200 40 T 400 50"/></svg>' +
+      rep(9, function (i) { var x = 6 + i * 11, y = [38, 58, 62, 44, 34, 44, 56, 58, 46][i]; return '<i class="bulb c' + (i % 4) + '" style="left:' + x + '%;top:calc(50% - 60px + ' + y + 'px);--d:' + (180 + i * 110) + 'ms"></i>'; });
+    if (t === 'coffee') return '<div class="cup"><i class="handle"></i></div>' + rep(3, function (i) { return '<i class="steam" style="--i:' + i + '"></i>'; });
+    if (t === 'paws') return rep(7, function (i) { return '<svg class="paw" style="--i:' + i + ';left:' + (8 + i * 13) + '%;top:calc(50% + ' + (i % 2 ? -26 : 18) + 'px)" viewBox="0 0 40 40"><ellipse cx="20" cy="27" rx="9" ry="8"/><circle cx="9" cy="15" r="4"/><circle cx="16" cy="9" r="4"/><circle cx="24" cy="9" r="4"/><circle cx="31" cy="15" r="4"/></svg>'; });
+    if (t === 'umbrella') return rep(34, function () { return '<i class="rain" style="left:' + rnd(0, 100) + '%;--d:' + rnd(0, 900) + 'ms;--t:' + rnd(500, 800) + 'ms"></i>'; }) +
+      '<svg class="umb" viewBox="0 0 200 200"><path class="can" d="M20 100 Q100 10 180 100 Q160 88 140 100 Q120 88 100 100 Q80 88 60 100 Q40 88 20 100Z"/><path class="stick" d="M100 100 V170 Q100 184 88 184 Q78 184 78 174"/></svg>';
+    if (t === 'race') return '<div class="lamps">' + rep(4, function (i) { return '<i class="lamp" style="--i:' + i + '"></i>'; }) + '</div>' + rep(18, function () { return '<i class="streak" style="top:' + rnd(15, 85) + '%;--d:' + rnd(0, 250) + 'ms;--w:' + rnd(60, 220) + 'px"></i>'; });
+    if (t === 'winter') return '<i class="frost"></i>' + rep(40, function () { return '<i class="flake" style="left:' + rnd(0, 100) + '%;--d:' + rnd(0, 800) + 'ms;--t:' + rnd(1200, 2000) + 'ms;--s:' + rnd(2, 6) + 'px;--x:' + rnd(-40, 40) + 'px"></i>'; }) + '<i class="ember"></i>';
+    if (t === 'sand') return '<svg class="dunes" viewBox="0 0 400 200" preserveAspectRatio="none"><path class="d1" d="M0 140 Q 80 100 160 130 T 320 120 T 400 130 V200 H0Z"/><path class="d2" d="M0 165 Q 100 135 200 160 T 400 150 V200 H0Z"/></svg><i class="sun2"></i>' +
+      rep(40, function () { return '<i class="grain" style="top:' + rnd(30, 80) + '%;--d:' + rnd(0, 900) + 'ms;--t:' + rnd(600, 1100) + 'ms"></i>'; });
+    if (t === 'lens') return '<svg class="fp" viewBox="0 0 120 120">' + rep(7, function (i) { var r = 10 + i * 7; return '<path d="M' + (60 - r) + ' 70 Q ' + (60 - r) + ' ' + (40 - i * 4) + ' 60 ' + (40 - i * 5) + ' Q ' + (60 + r) + ' ' + (40 - i * 4) + ' ' + (60 + r) + ' 70" style="--i:' + i + '"/>'; }) + '</svg><div class="lens"><i></i></div>';
+    return '';
+  }
   /* --- кінозаставка --- */
   function cine(it) {
     var c = it.c, l = it.l, k = it.k, src = pSrc(c), n = l ? String(l.num).padStart(2, '0') : '01';
-    var eyebrow = k === 'free' ? L('Безкоштовний урок', 'Darmowa lekcja', 'Free lesson') : k === 'start' ? L('Початок курсу', 'Początek kursu', 'Course start') : L('Продовжуємо', 'Kontynuujemy', 'Continuing');
+    var TH = THEME_OF[c.slug] || ''; var eyebrow = k === 'free' ? L('Безкоштовний урок', 'Darmowa lekcja', 'Free lesson') : k === 'start' ? L('Початок курсу', 'Początek kursu', 'Course start') : L('Продовжуємо', 'Kontynuujemy', 'Continuing');
     var o = document.createElement('div'); o.className = 'x-cine' + (RM ? ' rm' : '');
     o.innerHTML = '<div class="xc-bg"' + (src ? ' style="background-image:url(' + esc(src) + ')"' : '') + '></div><div class="xc-grain"></div>' +
-      '<div class="xc-lead"><svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="88"/><circle cx="100" cy="100" r="70"/><path d="M100 0v200M0 100h200"/></svg><div class="xc-sweep"></div><b class="xc-n">3</b></div>' +
+      (TH ? '<div class="xc-th xc-th-' + TH + '">' + themeHtml(TH) + '</div>' : '<div class="xc-lead"><svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="88"/><circle cx="100" cy="100" r="70"/><path d="M100 0v200M0 100h200"/></svg><div class="xc-sweep"></div><b class="xc-n">3</b></div>') +
       '<div class="xc-title"><span class="xc-eb">' + esc(eyebrow) + '</span><h2>' + esc(tr(c, 'title')) + '</h2>' + (l ? '<p><i>' + L('Урок', 'Lekcja', 'Lesson') + ' ' + n + '</i>' + esc(tr(l, 'title')) + '</p>' : '') + '</div>' +
       '<div class="xc-bar t"></div><div class="xc-bar b"></div><button type="button" class="xc-skip">' + L('Пропустити', 'Pomiń', 'Skip') + ' ›</button>';
     document.body.appendChild(o);
@@ -4647,14 +4669,16 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') window.addEv
     o.querySelector('.xc-skip').onclick = end; o.addEventListener('click', function (e) { if (!e.target.closest('.xc-skip')) end(); });
     requestAnimationFrame(function () { o.classList.add('in'); });
     if (RM) { o.classList.add('t'); at(900, end); return p; }
-    var nEl = o.querySelector('.xc-n');
+    var nEl = o.querySelector('.xc-n') || document.createElement('b');
     at(150, function () { o.classList.add('lead'); });
+    if (TH) { at(1500, function () { o.classList.add('flash', 't'); }); at(3150, end); return p; }
     at(550, function () { nEl.textContent = '2'; nEl.classList.remove('tick'); void nEl.offsetWidth; nEl.classList.add('tick'); });
     at(950, function () { nEl.textContent = '1'; nEl.classList.remove('tick'); void nEl.offsetWidth; nEl.classList.add('tick'); });
     at(1350, function () { o.classList.add('flash', 't'); });
     at(3000, end);
     return p;
   }
+  window.__mlCine = function (slug) { return cine({c:{slug:slug, title:slug}, l:{num:3, title:'Test'}, k:'next'}); };
   /* --- перехід: заставка + сторінка курсу під нею --- */
   function play(it) {
     try { sessionStorage.setItem('ml_hl', JSON.stringify({c:it.c.id, l:it.l && it.l.id, k:it.k, t:Date.now()})); } catch (e) {}
