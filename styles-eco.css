@@ -181,3 +181,69 @@ body.eco-themed #app{background:transparent}
 .x-world .w-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .x-world .w-links a{padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:inherit;text-decoration:none;font-size:14px}
 .x-world .w-links a:hover{background:rgba(255,255,255,.1)}
+
+/* ===== власні SVG-спутники ===== */
+.eco-pet .ml-pet{position:relative;width:118%;height:118%;margin:-9%;overflow:visible;display:block}
+.eco-pet.big{width:200px;height:200px}
+.ml-pet *{transform-box:view-box}
+.pe-all{transform-origin:100px 188px}
+.pe-all.m-happy,.pe-all.m-new{animation:peHop 2.8s cubic-bezier(.4,0,.3,1) infinite}
+.pe-breathe{transform-origin:100px 186px;animation:peBreath 3.2s ease-in-out infinite}
+.pe-all.m-sleepy .pe-breathe{animation-duration:5s}
+.pe-all.m-sad{animation:peSad 4s ease-in-out infinite;filter:saturate(.75)}
+.pe-all.m-sleepy{filter:saturate(.7) brightness(.92)}
+.pe-shadow{transform-origin:100px 190px;animation:peShadow 2.8s cubic-bezier(.4,0,.3,1) infinite}
+.pe-eye{transform-box:fill-box;transform-origin:center;animation:peBlink 4.6s infinite}
+.pe-wl{transform-origin:62px 110px;animation:peFlapL 2.6s ease-in-out infinite}
+.pe-wr{transform-origin:138px 110px;animation:peFlapR 2.6s ease-in-out infinite}
+.pe-tail{transform-origin:136px 160px;animation:peWag 1.8s ease-in-out infinite}
+.pe-ear{transform-box:fill-box;transform-origin:50% 100%;animation:peTwitch 5.5s ease-in-out infinite}
+.pe-ear.r{animation-delay:1.3s}
+.pe-leg{transform-box:fill-box;transform-origin:100% 50%;animation:peLeg 1.2s ease-in-out infinite}
+.pe-leg.r{transform-origin:0 50%}.pe-leg.b{animation-delay:.6s}
+.pe-wheel{transform-box:fill-box;transform-origin:center!important;animation:peSpin 2.4s linear infinite}
+.pe-smoke{animation:peSmoke 2.2s ease-out infinite}
+.pe-scarf-t{transform-box:fill-box;transform-origin:50% 0;animation:peSway 2.6s ease-in-out infinite}
+.pe-cape{transform-origin:100px 130px;animation:peCape 3.4s ease-in-out infinite}
+.pe-arm{transform-box:fill-box;transform-origin:50% 0;animation:peArm 3.6s ease-in-out infinite}.pe-arm.r{animation-delay:1.8s}
+.pe-egg{transform-origin:100px 186px;animation:peEgg 3.2s ease-in-out infinite}
+.pe-peek{animation:pePeek 4s ease-in-out infinite}
+.pe-halo{transform-origin:100px 112px;animation:peSpinS 16s linear infinite}
+.pe-z{animation:peZ 3s ease-in-out infinite}
+.pe-tear{animation:peTear 2.4s ease-in infinite}
+.eco-pet.pat .pe-all{animation:pePat .7s cubic-bezier(.3,1.6,.5,1)}
+.eco-pet.eat .pe-all{animation:peEat 1s ease-in-out}
+@keyframes peHop{0%,55%,100%{transform:translateY(0) scale(1)}12%{transform:translateY(0) scale(1.06,.93)}26%{transform:translateY(-10px) scale(.96,1.05)}40%{transform:translateY(0) scale(1.05,.95)}48%{transform:translateY(-2px)}}
+@keyframes peShadow{0%,55%,100%{transform:scale(1);opacity:.28}26%{transform:scale(.8);opacity:.16}}
+@keyframes peBreath{50%{transform:scale(1.025,.985)}}
+@keyframes peSad{50%{transform:translateY(2px) rotate(-1.5deg)}}
+@keyframes peBlink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+@keyframes peFlapL{0%,70%,100%{transform:rotate(0)}78%{transform:rotate(18deg)}86%{transform:rotate(-4deg)}92%{transform:rotate(14deg)}}
+@keyframes peFlapR{0%,70%,100%{transform:rotate(0)}78%{transform:rotate(-18deg)}86%{transform:rotate(4deg)}92%{transform:rotate(-14deg)}}
+@keyframes peWag{50%{transform:rotate(-12deg)}}
+@keyframes peTwitch{0%,84%,100%{transform:rotate(0)}88%{transform:rotate(-10deg)}92%{transform:rotate(6deg)}}
+@keyframes peLeg{50%{transform:rotate(8deg)}}
+@keyframes peSpin{to{transform:rotate(360deg)}}
+@keyframes peSpinS{to{transform:rotate(360deg)}}
+@keyframes peSmoke{0%{transform:translateY(6px);opacity:0}30%{opacity:1}100%{transform:translate(8px,-18px);opacity:0}}
+@keyframes peSway{50%{transform:rotate(-7deg)}}
+@keyframes peCape{50%{transform:skewX(-3deg) scaleX(1.03)}}
+@keyframes peArm{50%{transform:rotate(-8deg)}}
+@keyframes peEgg{0%,62%,100%{transform:rotate(0)}68%{transform:rotate(-7deg)}74%{transform:rotate(6deg)}80%{transform:rotate(-4deg)}86%{transform:rotate(2deg)}}
+@keyframes pePeek{0%,40%,100%{opacity:1}45%,55%{opacity:.2}}
+@keyframes peZ{0%{transform:translate(0,6px);opacity:0}40%{opacity:1}100%{transform:translate(8px,-10px);opacity:0}}
+@keyframes peTear{0%{transform:translateY(0);opacity:0}20%{opacity:1}100%{transform:translateY(14px);opacity:0}}
+@keyframes pePat{30%{transform:scale(1.12,.86)}60%{transform:scale(.94,1.08) translateY(-12px)}}
+@keyframes peEat{20%,60%{transform:scale(1.08,.92)}40%,80%{transform:scale(.96,1.05)}}
+.eco-step-p{display:grid!important;place-items:center;height:64px;filter:none!important}
+.eco-step-p .eco-pet{width:64px;height:64px}
+.eco-step:not(.got) .eco-step-p{opacity:.5}
+.eco-lock{font-style:normal;font-size:28px;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.2)}
+.eco-old .eco-pet{width:150px;height:150px}
+.eco-chipbar .eco-pet{width:52px;height:52px}
+.wx-pet .eco-pet{width:70px;height:70px}
+@media(max-width:640px){.eco-pet.big{width:170px;height:170px}.wx-pet .eco-pet{width:56px;height:56px}}
+@media (prefers-reduced-motion:reduce){.ml-pet *{animation:none!important}}
+.eco-wear-p .eco-pet,.eco-prev.pet .eco-pet{width:56px;height:56px}
+.eco-prev.pet{overflow:visible}.eco-prev.pet .ep-aura{display:none}
+.eco-wear{min-width:96px}

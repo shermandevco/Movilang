@@ -3249,10 +3249,10 @@ function viewWorld(cid, tab) {
     (r[2] || []).forEach(function (p) { done[p.lesson_id] = p; });
     return wFaction(c).then(function (f) {
       var F = f && W.factions[f], pts = wPoints(ls, done);
-      var EC = ecoOf(c); window.ECO_LASTC = c; var tabs = [['me', tx({uk:'Мій світ', pl:'Mój świat', en:'My world'})]].concat(EC ? [['pet', EC.pet.stages[1] + ' ' + tx({uk:'Спутник', pl:'Towarzysz', en:'Companion'})], ['shop', '🛍️ ' + tx({uk:'Лавка', pl:'Sklep', en:'Shop'})]] : []).concat([['rank', '🏆 ' + wl(W.standings)], ['cards', W.cardIcon + ' ' + wl(W.collection)], ['journal', W.journal.icon + ' ' + wl(W.journal.title)]]);
+      var EC = ecoOf(c); window.ECO_LASTC = c; var tabs = [['me', tx({uk:'Мій світ', pl:'Mój świat', en:'My world'})]].concat(EC ? [['pet', '🐾 ' + tx({uk:'Спутник', pl:'Towarzysz', en:'Companion'})], ['shop', '🛍️ ' + tx({uk:'Лавка', pl:'Sklep', en:'Shop'})]] : []).concat([['rank', '🏆 ' + wl(W.standings)], ['cards', W.cardIcon + ' ' + wl(W.collection)], ['journal', W.journal.icon + ' ' + wl(W.journal.title)]]);
       var nDoneW = ls.filter(function (l) { return done[l.id]; }).length, bossW = ls.filter(wIsBoss), nCardsW = bossW.filter(function (l) { return done[l.id]; }).length;
       var artW = POSTER_ART.indexOf(c.slug) > -1 ? 'assets/posters/' + c.slug + '.webp?v=3' : '', quiet = window.WX_LAST === c.id;
-      var TI = {me:'🗺️', pet:EC ? EC.pet.stages[1] : '', shop:'🛍️', rank:'🏆', cards:W.cardIcon, journal:W.journal.icon};
+      var TI = {me:'🗺️', pet:'🐾', shop:'🛍️', rank:'🏆', cards:W.cardIcon, journal:W.journal.icon};
       $app.innerHTML = '<div class="page w-world wx' + (quiet ? ' wx-quiet' : '') + '" style="--fc:' + esc(F ? F.color : '#e8b93a') + '">' +
         '<section class="wx-hero"><div class="wx-bg"' + (artW ? ' style="background-image:url(\'' + esc(artW) + '\')"' : '') + '></div><div class="wx-shade"></div><div class="wx-glow"></div>' +
           '<div class="wx-parts" aria-hidden="true">' + Array.apply(null, Array(14)).map(function (_, i) { return '<i style="--i:' + i + ';--x:' + ((i * 37) % 100) + '%;--d:' + (6 + (i * 7) % 9) + 's"></i>'; }).join('') + '</div>' +
@@ -3383,13 +3383,11 @@ function ecoMoodTxt(E, m) {
     : m === 'sleepy' ? tx({uk:n + ' заснув, чекаючи на тебе. Розбуди його уроком!', pl:n + ' zasnął, czekając na ciebie. Obudź go lekcją!', en:n + ' fell asleep waiting for you. Wake it up with a lesson!'})
     : tx({uk:'Пройди урок — і ' + n + ' вилупиться.', pl:'Ukończ lekcję, a ' + n + ' się wykluje.', en:'Finish a lesson and your ' + n + ' will hatch.'});
 }
-function ecoPet(E, s, big) {
-  var xp = s ? s.xp : 0, lv = ecoLevel(xp), st = ecoStage(lv), mood = s ? s.mood : 'new', eq = (s && s.equipped) || {}, out = eq.outfit && ecoItem(E, eq.outfit);
+function ecoPet(E, s, big, forceStage) {
+  var xp = s ? s.xp : 0, lv = ecoLevel(xp), st = forceStage != null ? forceStage : ecoStage(lv), mood = s ? s.mood : 'new', eq = (s && s.equipped) || {}, out = eq.outfit && ecoItem(E, eq.outfit);
   if (mood === 'new' && xp > 0) mood = 'happy';
-  return '<div class="eco-pet st' + st + ' m-' + mood + (big ? ' big' : '') + '" style="--aura:' + esc(E.pet.aura) + '"><div class="ep-aura"></div><div class="ep-ring"></div>' +
-    '<div class="ep-body"><span class="ep-e">' + esc(E.pet.stages[st]) + '</span>' + (out && st > 0 ? '<span class="ep-w at-' + esc(out.at) + '">' + esc(out.wear) + '</span>' : '') + '</div>' +
-    (st === 3 ? '<span class="ep-sp s1">✦</span><span class="ep-sp s2">✦</span><span class="ep-sp s3">✧</span>' : '') +
-    (mood === 'sad' ? '<span class="ep-fx">💧</span>' : mood === 'sleepy' ? '<span class="ep-fx z">💤</span>' : mood === 'happy' && st > 0 ? '<span class="ep-fx h">♥</span>' : '') + '<div class="ep-shadow"></div></div>';
+  if (window.MLPET && E.pet.sp) return '<div class="eco-pet st' + st + ' m-' + mood + (big ? ' big' : '') + '" style="--aura:' + esc(E.pet.aura) + '"><div class="ep-aura"></div>' + MLPET.svg(E.pet.sp, st, mood, st > 0 ? out : null) + '</div>';
+  return '<div class="eco-pet st' + st + ' m-' + mood + (big ? ' big' : '') + '" style="--aura:' + esc(E.pet.aura) + '"><div class="ep-aura"></div><div class="ep-body"><span class="ep-e">' + esc(E.pet.stages[st]) + '</span></div><div class="ep-shadow"></div></div>';
 }
 function ecoXpBar(s) { var n = ecoNext(s ? s.xp : 0); return '<div class="eco-xp"><div class="eco-xp-t"><b>' + tx({uk:'Рівень ', pl:'Poziom ', en:'Level '}) + n.lv + '</b><small>' + (n.need ? tx({uk:'ще ', pl:'jeszcze ', en:''}) + n.need + ' XP' + tx({uk:' до наступного', pl:' do następnego', en:' to next'}) : tx({uk:'максимум!', pl:'maksimum!', en:'max!'})) + '</small></div><div class="eco-xp-b"><i style="width:' + n.pct + '%"></i></div></div>'; }
 function ecoCrest(F, E, s, big) {
@@ -3415,7 +3413,7 @@ function ecoLevelUp(E, s, lv0) {
   var st0 = ecoStage(lv0), st1 = ecoStage(s.level || ecoLevel(s.xp)), evo = st1 > st0;
   var box = document.createElement('div'); box.className = 'eco-modal'; box.setAttribute('role', 'dialog');
   box.innerHTML = '<div class="eco-mbox' + (evo ? ' evo' : '') + '"><div class="eco-rays"></div><div class="eyebrow">' + (evo ? tx({uk:'Еволюція!', pl:'Ewolucja!', en:'Evolution!'}) : tx({uk:'Новий рівень!', pl:'Nowy poziom!', en:'Level up!'})) + '</div>' +
-    '<div class="eco-evo">' + (evo ? '<span class="eco-old">' + esc(E.pet.stages[st0]) + '</span>' : '') + ecoPet(E, s, true) + '</div>' +
+    '<div class="eco-evo">' + (evo ? '<span class="eco-old">' + ecoPet(E, {xp:0, mood:'happy'}, true, st0) + '</span>' : '') + ecoPet(E, s, true) + '</div>' +
     '<h3>' + esc(wl(E.pet.name)) + ' · ' + tx({uk:'рівень ', pl:'poziom ', en:'level '}) + (s.level || ecoLevel(s.xp)) + '</h3>' +
     '<p class="muted">' + (st1 >= 1 && st0 < 1 ? tx({uk:'Тепер спутник говорить: щодня підказує слово дня мовою курсу.', pl:'Teraz towarzysz mówi: codziennie podpowiada słowo dnia.', en:'Your companion can talk now: a word of the day, every day.'}) : st1 === 3 && st0 < 3 ? tx({uk:'Легендарна форма! Найвищий рівень спутника.', pl:'Legendarna forma! Najwyższy poziom.', en:'Legendary form! The highest level.'}) : tx({uk:'Продовжуй навчання — на рівнях 3, 6 і 10 він змінює вигляд.', pl:'Ucz się dalej — na poziomach 3, 6 i 10 zmienia wygląd.', en:'Keep going: at levels 3, 6 and 10 it changes form.'})) + '</p>' +
     '<button type="button" class="btn btn-red" id="ecoOk">' + tx({uk:'Чудово!', pl:'Super!', en:'Awesome!'}) + '</button></div>';
@@ -3509,7 +3507,7 @@ function ecoShop(body, c, E, W, F, s) {
   function card(it) {
     var k = ECO_KIND[it.kind], has = owned.indexOf(it.id) > -1, on = eq[it.kind] === it.id, cnt = it.kind === 'boost' ? s.boost : inv[it.kind], poor = !s.admin && s.coins < it.price;
     var prev = it.kind === 'theme' ? '<span class="eco-prev th" style="background:' + esc(it.bg) + '">' + esc(it.icon) + '</span>' : it.kind === 'frame' ? '<span class="eco-prev fr" style="--ring:' + esc(it.ring) + '">' + esc(F ? F.icon : it.icon) + '</span>' :
-      it.kind === 'sticker' ? '<span class="eco-prev st">' + it.pack.slice(0, 4).map(esc).join('') + '</span>' : '<span class="eco-prev">' + esc(it.icon) + '</span>';
+      it.kind === 'sticker' ? '<span class="eco-prev st">' + it.pack.slice(0, 4).map(esc).join('') + '</span>' : it.kind === 'outfit' && window.MLPET && E.pet.sp ? '<span class="eco-prev pet">' + ecoPet(E, {xp:Math.max(s.xp, 400), mood:'happy', equipped:{outfit:it.id}}) + '</span>' : '<span class="eco-prev">' + esc(it.icon) + '</span>';
     var btn = has ? (it.kind === 'sticker' ? '<span class="eco-own">✓ ' + tx({uk:'У чатах', pl:'W czatach', en:'In chats'}) + '</span>' : '<button type="button" class="btn btn-sm ' + (on ? 'btn-ghost' : 'btn-red') + '" data-eq="' + esc(it.id) + '" data-slot="' + esc(it.kind) + '">' + (on ? tx({uk:'Зняти', pl:'Zdejmij', en:'Unequip'}) : tx({uk:'Надіти', pl:'Załóż', en:'Equip'})) + '</button>')
       : '<button type="button" class="btn btn-sm eco-buy' + (poor ? ' poor' : '') + '" data-buy="' + esc(it.id) + '"' + (poor ? ' title="' + esc(tx({uk:'Не вистачає ', pl:'Brakuje ', en:'Short by '}) + (it.price - s.coins)) + '"' : '') + '>' + esc(E.cur.icon) + ' ' + it.price + '</button>';
     return '<div class="eco-item k-' + esc(it.kind) + (on ? ' on' : '') + (has ? ' has' : '') + '">' + prev + '<div class="eco-it"><b>' + esc(wl(it.name)) + '</b><small>' + esc(tx(k.t)) + '</small></div><div class="eco-ib">' + (cnt ? '<span class="eco-cnt">×' + cnt + '</span>' : '') + btn + '</div></div>';
@@ -3544,9 +3542,9 @@ function ecoPetTab(body, c, E, W, F, s, ls, done) {
       (food ? '<button type="button" class="btn btn-red eco-feed" id="ecoFeed"' + (!s.admin && s.coins < food.price ? ' disabled' : '') + '>' + esc(food.icon) + ' ' + tx({uk:'Нагодувати', pl:'Nakarm', en:'Feed'}) + ' · ' + esc(E.cur.icon) + ' ' + food.price + ' <small>+' + (E.rules.food_xp || 20) + ' XP</small></button>' : '') +
       (fedAgo < 12 ? '<p class="small muted">' + tx({uk:'Нещодавно поїв — дякує!', pl:'Niedawno jadł — dziękuje!', en:'Recently fed — thank you!'}) + '</p>' : '') + '</div></div>' +
     '<h3 class="w-h">' + tx({uk:'Шлях еволюції', pl:'Ścieżka ewolucji', en:'Evolution path'}) + '</h3><div class="eco-path">' + [1, 3, 6, 10].map(function (L, i) {
-      return '<div class="eco-step' + (st >= i ? ' got' : '') + (st === i ? ' now' : '') + '"><span>' + esc(i <= st ? E.pet.stages[i] : '❔') + '</span><b>' + tx({uk:'Рівень ', pl:'Poziom ', en:'Level '}) + L + '</b><small>' + [tx({uk:'Народження', pl:'Narodziny', en:'Birth'}), tx({uk:'Говорить слова дня', pl:'Mówi słowa dnia', en:'Says words of the day'}), tx({uk:'Доросла форма', pl:'Dorosła forma', en:'Adult form'}), tx({uk:'Легендарна форма', pl:'Legendarna forma', en:'Legendary form'})][i] + '</small></div>';
+      return '<div class="eco-step' + (st >= i ? ' got' : '') + (st === i ? ' now' : '') + '"><span class="eco-step-p">' + (i <= st ? ecoPet(E, {xp:s.xp, mood:'happy', equipped:{}}, false, i) : '<i class="eco-lock">?</i>') + '</span><b>' + tx({uk:'Рівень ', pl:'Poziom ', en:'Level '}) + L + '</b><small>' + [tx({uk:'Народження', pl:'Narodziny', en:'Birth'}), tx({uk:'Говорить слова дня', pl:'Mówi słowa dnia', en:'Says words of the day'}), tx({uk:'Доросла форма', pl:'Dorosła forma', en:'Adult form'}), tx({uk:'Легендарна форма', pl:'Legendarna forma', en:'Legendary form'})][i] + '</small></div>';
     }).join('') + '</div>' +
-    '<h3 class="w-h">' + tx({uk:'Гардероб', pl:'Garderoba', en:'Wardrobe'}) + '</h3>' + (outs.length ? '<div class="eco-wardrobe">' + outs.map(function (o) { return '<button type="button" class="eco-wear' + (eq === o.id ? ' on' : '') + '" data-wear="' + esc(o.id) + '"><span>' + esc(o.icon) + '</span><small>' + esc(wl(o.name)) + '</small></button>'; }).join('') + '</div>'
+    '<h3 class="w-h">' + tx({uk:'Гардероб', pl:'Garderoba', en:'Wardrobe'}) + '</h3>' + (outs.length ? '<div class="eco-wardrobe">' + outs.map(function (o) { return '<button type="button" class="eco-wear' + (eq === o.id ? ' on' : '') + '" data-wear="' + esc(o.id) + '"><span class="eco-wear-p">' + ecoPet(E, {xp:Math.max(s.xp, 100), mood:'happy', equipped:{outfit:o.id}}) + '</span><small>' + esc(wl(o.name)) + '</small></button>'; }).join('') + '</div>'
       : '<p class="muted">' + tx({uk:'Поки порожньо. Одяг для спутника — у ', pl:'Na razie pusto. Stroje są w ', en:'Empty for now. Outfits are in the '}) + '<a href="#/world/' + esc(c.id) + '/shop">' + tx({uk:'лавці', pl:'sklepie', en:'shop'}) + '</a>.' + (st < 1 ? ' ' + tx({uk:'Одяг видно з 3-го рівня.', pl:'Strój widać od 3. poziomu.', en:'Outfits show from level 3.'}) : '') + '</p>');
   ecoAdminBind(body, c, function (ns) { ecoPetTab(body, c, E, W, F, ns, ls, done); });
   var fb = body.querySelector('#ecoFeed'); if (fb) fb.onclick = function () {
